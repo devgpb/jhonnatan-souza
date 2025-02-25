@@ -122,7 +122,7 @@ export function NavBar({ background = false }: NavBarProps) {
       className={`
         fixed top-0 left-0 w-full z-50 
         transition-colors duration-300 ease-in-out
-        ${isBackgroundActive ? "bg-black" : "bg-transparent"}
+        ${isBackgroundActive ? "bg-primario" : "bg-transparent"}
       `}
     >
       <div className="container flex h-20 items-center justify-between">

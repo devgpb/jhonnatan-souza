@@ -66,6 +66,10 @@
   }
 }
 
+.bg-primario{
+  background-color: #132E30 !important;
+}
+
 @layer base {
   * {
     @apply border-border;
