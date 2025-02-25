@@ -55,7 +55,7 @@ export function HeroSection() {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative h-[95vh] w-[full] overflow-hidden">
+    <div ref={containerRef} className="relative h-[95vh] w-[full] overflow-hidden" >
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -78,15 +78,17 @@ export function HeroSection() {
 
       <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
         <div className="text-center text-white space-y-4 sm:space-y-6 max-w-4xl px-2">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight" style={{ color: "#fabc3f" }}
+          >
             <Typewriter text={slides[currentSlide].title} />
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl font-light">
+          <p className="text-lg sm:text-xl md:text-2xl font-light" style={{ color: "#fabc3f" }}
+          >
             {slides[currentSlide].description}
           </p>
         </div>
 
-        <Button className="mt-6 sm:mt-8 px-12 py-6 border border-white text-white bg-transparent hover:bg-white/10 text-lg sm:text-xl font-semibold rounded-md">
+        <Button className="mt-6 sm:mt-8 px-12 py-6 border border-yellow-600 text-white bg-transparent hover:bg-yellow/10 text-lg sm:text-xl font-semibold rounded-md" style={{ color: "#fabc3f" }}>
           Veja os imóveis
         </Button>
       </div>
@@ -95,7 +97,7 @@ export function HeroSection() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-white hover:bg-white/10 border border-white/20"
+          className="text-yellow-600 hover:bg-yellow/20 border border-yellow/20"
           onClick={prevSlide}
         >
           <ChevronLeft className="h-5 sm:h-6 w-5 sm:w-6" />
@@ -114,7 +116,7 @@ export function HeroSection() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-white hover:bg-white/10 border border-white/20"
+          className="text-yellow-400 hover:bg-yellow/10 border border-yellow/20"
           onClick={nextSlide}
         >
           <ChevronRight className="h-5 sm:h-6 w-5 sm:w-6" />
