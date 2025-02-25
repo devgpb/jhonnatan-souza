@@ -163,7 +163,7 @@ export default function PropertiesPage() {
   }
   return (
     <>
-      <MainLayout>
+      <NavBar background/>
       <main className="container py-12 px-4 md:px-0 pt-14">
       <FilterBar onSearch={handleSearch}/>
         {/* Apartments Section */}
@@ -223,7 +223,6 @@ export default function PropertiesPage() {
           </div>
         </section>
       </main>
-    </MainLayout>
     </>
   )
 }

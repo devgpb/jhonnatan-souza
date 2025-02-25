@@ -1,11 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Menu, Search, X, User, ArrowRight, Building2, Home, Building, ChevronDown } from "lucide-react"
+import { 
+  Menu, 
+  Search, 
+  X, 
+  User, 
+  ArrowRight, 
+  Building2, 
+  Home, 
+  Building, 
+  ChevronDown 
+} from "lucide-react"
 import { Button } from "./ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 import Image from "next/image"
+
+// Tipar as propriedades, permitindo receber "background"
+interface NavBarProps {
+  background?: boolean
+}
 
 const propertyTypes = [
   {
@@ -24,13 +39,21 @@ const propertyTypes = [
         price: "R$ 6.200.000",
         href: "/imoveis/apartamentos/vista-parque",
       },
-      { name: "Garden de 300m² na Vila Nova", price: "R$ 12.000.000", href: "/imoveis/apartamentos/garden-vila-nova" },
+      { 
+        name: "Garden de 300m² na Vila Nova", 
+        price: "R$ 12.000.000", 
+        href: "/imoveis/apartamentos/garden-vila-nova" 
+      },
       {
         name: "Apartamento decorado nos Jardins",
         price: "R$ 5.800.000",
         href: "/imoveis/apartamentos/decorado-jardins",
       },
-      { name: "Duplex com terraço em Moema", price: "R$ 7.300.000", href: "/imoveis/apartamentos/duplex-moema" },
+      { 
+        name: "Duplex com terraço em Moema", 
+        price: "R$ 7.300.000", 
+        href: "/imoveis/apartamentos/duplex-moema" 
+      },
     ],
   },
   {
@@ -65,36 +88,73 @@ const propertyTypes = [
   },
 ]
 
-export function NavBar() {
+export function NavBar({ background = false }: NavBarProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [hoveredType, setHoveredType] = useState("Apartamentos") // Set default to "Apartamentos"
+  const [hoveredType, setHoveredType] = useState("Apartamentos")
+  const [isBackgroundActive, setIsBackgroundActive] = useState(false)
+
+  useEffect(() => {
+    // Se background=true, força o fundo escuro e não adiciona listener de scroll
+    if (background) {
+      setIsBackgroundActive(true)
+      return
+    }
+
+    // Caso contrário, adiciona listener para controlar a transição
+    function handleScroll() {
+      // Se quiser que o fundo ative depois de qq scroll, pode usar window.scrollY > 0
+      // Se quiser que seja depois de 200px, mude para > 200
+      if (window.scrollY > 200) {
+        setIsBackgroundActive(true)
+      } else {
+        setIsBackgroundActive(false)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [background])
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-transparent z-50">
+    <header
+      className={`
+        fixed top-0 left-0 w-full z-50 
+        transition-colors duration-300 ease-in-out
+        ${isBackgroundActive ? "bg-black" : "bg-transparent"}
+      `}
+    >
       <div className="container flex h-20 items-center justify-between">
-        <Link href="/" className="font-bold text-3xl mt-2 tracking-tight text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
-          <Image
-            src={"/marca/icone.svg"}
-            alt={"Logo Jhonnatan"}
-            width={50}
-            height={40}
-          />
+        <Link
+          href="/"
+          className="font-bold text-3xl mt-2 tracking-tight text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+        >
+          <Image src={"/marca/icone.svg"} alt={"Logo Jhonnatan"} width={50} height={40} />
         </Link>
 
         <nav className="hidden md:flex items-center gap-10">
-          <Link href="/" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)] rounded-md" style={{ color: "#fabc3f" }}>
+          <Link
+            href="/"
+            className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+            style={{ color: "#fabc3f" }}
+          >
             Início
           </Link>
 
+          {/* Dropdown Imóveis */}
           <div className="relative group cursor-pointer">
-            <Link href="/imoveis"
-              className="text-lg font-medium hover:text-primary transition-colors inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}
+            <Link
+              href="/imoveis"
+              className="text-lg font-medium hover:text-primary transition-colors inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+              style={{ color: "#fabc3f" }}
             >
               Imóveis
               <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:-rotate-180" />
             </Link>
             <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
               <div className="bg-white rounded-lg overflow-hidden flex min-w-[800px] shadow-xl border">
+                {/* Coluna 1 */}
                 <div className="w-[300px] p-6 border-r">
                   <h3 className="text-lg font-semibold mb-4">Explore por imóveis</h3>
                   <div className="space-y-1">
@@ -102,7 +162,9 @@ export function NavBar() {
                       <div
                         key={type.name}
                         onMouseEnter={() => setHoveredType(type.name)}
-                        className={`rounded-lg transition-colors ${hoveredType === type.name ? "bg-muted" : ""}`}
+                        className={`rounded-lg transition-colors ${
+                          hoveredType === type.name ? "bg-muted" : ""
+                        }`}
                       >
                         <Link href={type.href} className="flex items-center gap-2 py-3 px-3 transition-colors group">
                           <type.icon className="h-5 w-5 text-primary" />
@@ -115,6 +177,7 @@ export function NavBar() {
                     ))}
                   </div>
                 </div>
+                {/* Coluna 2 */}
                 <div className="flex-1 p-6">
                   {hoveredType && propertyTypes.find((t) => t.name === hoveredType) && (
                     <div>
@@ -137,7 +200,9 @@ export function NavBar() {
                           ))}
                         <div className="pt-3 mt-3 border-t">
                           <Link
-                            href={propertyTypes.find((t) => t.name === hoveredType)?.href || "#"}
+                            href={
+                              propertyTypes.find((t) => t.name === hoveredType)?.href || "#"
+                            }
                             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
                           >
                             Ver todos os {hoveredType.toLowerCase()}
@@ -151,23 +216,38 @@ export function NavBar() {
               </div>
             </div>
           </div>
+          {/* Fim dropdown Imóveis */}
 
-          <Link href="/sobre" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}>
+          <Link
+            href="/sobre"
+            className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+            style={{ color: "#fabc3f" }}
+          >
             Sobre
           </Link>
-          <Link href="/contato" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}>
+          <Link
+            href="/contato"
+            className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+            style={{ color: "#fabc3f" }}
+          >
             Contato
           </Link>
         </nav>
 
         <div className="flex items-center gap-6">
-          <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(!isSearchOpen)} className="h-12 w-12">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            className="h-12 w-12"
+          >
             <Search className="h-6 w-6" />
           </Button>
 
           <Link
             href="/login"
-            className="hidden md:flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}
+            className="hidden md:flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+            style={{ color: "#fabc3f" }}
           >
             <User className="h-6 w-6" />
             Entrar
@@ -181,42 +261,30 @@ export function NavBar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px]">
               <nav className="flex flex-col gap-8 pt-8">
-                <Link href="/" className="text-xl font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
+                <Link
+                  href="/"
+                  className="text-xl font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+                >
                   Início
                 </Link>
                 <div className="space-y-4">
-                  <Link href="/imoveis"  className="text-xl font-medium inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" >
+                  <Link
+                    href="/imoveis"
+                    className="text-xl font-medium inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+                  >
                     Imóveis
-                    {/* <ChevronDown className="h-4 w-4" /> */}
                   </Link>
-                  {/* <div className="space-y-6 pl-4">
-                    {propertyTypes.map((type) => (
-                      <div key={type.name} className="space-y-2">
-                        <Link
-                          href={type.href}
-                          className="block text-lg hover:text-primary transition-colors font-medium"
-                        >
-                          {type.name}
-                        </Link>
-                        <div className="space-y-1 pl-4">
-                          {type.featured.slice(0, 3).map((item) => (
-                            <Link
-                              key={item.name}
-                              href={item.href}
-                              className="block text-sm hover:text-primary transition-colors"
-                            >
-                              {item.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div> */}
                 </div>
-                <Link href="/sobre" className="text-xl font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
+                <Link
+                  href="/sobre"
+                  className="text-xl font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+                >
                   Sobre
                 </Link>
-                <Link href="/contato" className="text-xl font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
+                <Link
+                  href="/contato"
+                  className="text-xl font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+                >
                   Contato
                 </Link>
                 <Link
@@ -232,10 +300,13 @@ export function NavBar() {
         </div>
       </div>
 
+      {/* Barra de busca expansível */}
       <div
-        className={`border-t overflow-hidden transition-all duration-300 ease-in-out ${
-          isSearchOpen ? "h-[84px] opacity-100" : "h-0 opacity-0"
-        }`}
+        className={`
+          border-t overflow-hidden 
+          transition-all duration-300 ease-in-out
+          ${isSearchOpen ? "h-[84px] opacity-100" : "h-0 opacity-0"}
+        `}
       >
         <div className="container py-5">
           <div className="relative">
@@ -259,4 +330,3 @@ export function NavBar() {
     </header>
   )
 }
-

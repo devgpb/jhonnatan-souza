@@ -223,7 +223,7 @@ export function FilterBar({onSearch}: FilterProps) {
   }
 
   return (
-    <div className="bg-white p-4 shadow-sm rounded-lg mx-auto w-full max-w-5xl">
+    <div className="bg-white p-4 mt-5 shadow-sm rounded-lg mx-auto w-full max-w-5xl">
       <div className="flex flex-wrap gap-3 items-center">
         {/* Campo de busca ajustado para ficar à esquerda */}
         <div className="relative w-full md:w-64">
