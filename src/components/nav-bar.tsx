@@ -72,12 +72,12 @@ export function NavBar() {
   return (
     <header className="fixed top-0 left-0 w-full bg-transparent z-50">
       <div className="container flex h-20 items-center justify-between">
-        <Link href="/" className="font-bold text-3xl tracking-tight text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
+        <Link href="/" className="font-bold text-3xl mt-2 tracking-tight text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
           <Image
             src={"/marca/icone.svg"}
             alt={"Logo Jhonnatan"}
-            width={80}
-            height={60}
+            width={50}
+            height={40}
           />
         </Link>
 

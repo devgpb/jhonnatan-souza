@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Instagram } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
@@ -8,14 +9,22 @@ export function Footer() {
         <div className="grid grid-cols-12 gap-8 py-20">
           {/* Logo and Description */}
           <div className="col-span-12 lg:col-span-4 space-y-6">
+            <div className=" h-[200px]">
             <Link href="/" className="inline-block">
-              <h2 className="text-2xl font-bold">Jhonnathan</h2>
+              <Image
+                src={"/marca/marca.svg"}
+                alt={"Logo Jhonnatan"}
+                width={300}
+                height={100}
+                className="object-cover"
+              />
             </Link>
+            </div>
             <p className="text-gray-400 leading-relaxed">
               Conectamos compradores e vendedores a corretores especialistas com acesso ao maior portfólio de imóveis de
               alto padrão de São Paulo.
             </p>
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <a
                 href="https://instagram.com/jhonnathan"
                 target="_blank"
@@ -24,7 +33,7 @@ export function Footer() {
               >
                 <Instagram className="h-6 w-6" />
               </a>
-            </div>
+            </div> */}
           </div>
 
           {/* Navigation Links */}
