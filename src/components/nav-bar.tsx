@@ -82,13 +82,13 @@ export function NavBar() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-10">
-          <Link href="/" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)] rounded-md">
+          <Link href="/" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)] rounded-md" style={{ color: "#fabc3f" }}>
             Início
           </Link>
 
           <div className="relative group cursor-pointer">
             <Link href="/imoveis"
-              className="text-lg font-medium hover:text-primary transition-colors inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+              className="text-lg font-medium hover:text-primary transition-colors inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}
             >
               Imóveis
               <ChevronDown className="h-4 w-4 transition-transform duration-200 group-hover:-rotate-180" />
@@ -152,10 +152,10 @@ export function NavBar() {
             </div>
           </div>
 
-          <Link href="/sobre" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
+          <Link href="/sobre" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}>
             Sobre
           </Link>
-          <Link href="/contato" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
+          <Link href="/contato" className="text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}>
             Contato
           </Link>
         </nav>
@@ -167,7 +167,7 @@ export function NavBar() {
 
           <Link
             href="/login"
-            className="hidden md:flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]"
+            className="hidden md:flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" style={{ color: "#fabc3f" }}
           >
             <User className="h-6 w-6" />
             Entrar
@@ -185,7 +185,7 @@ export function NavBar() {
                   Início
                 </Link>
                 <div className="space-y-4">
-                  <Link href="/imoveis"  className="text-xl font-medium inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
+                  <Link href="/imoveis"  className="text-xl font-medium inline-flex items-center gap-1 text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]" >
                     Imóveis
                     {/* <ChevronDown className="h-4 w-4" /> */}
                   </Link>
