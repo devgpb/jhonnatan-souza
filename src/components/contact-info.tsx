@@ -37,8 +37,8 @@ export function ContactInfo() {
             <div>
               <h3 className="font-medium mb-1">E-mail</h3>
               <p className="text-muted-foreground">
-                <a href="mailto:contato@liecon.com.br" className="hover:text-primary transition-colors">
-                  contato@liecon.com.br
+                <a href="mailto:contato@jhonnathan.com.br" className="hover:text-primary transition-colors">
+                  contato@jhonnathan.com.br
                 </a>
               </p>
             </div>

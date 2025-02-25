@@ -167,7 +167,7 @@ export default function BrokerForm() {
                   value={broker.company}
                   onChange={handleBrokerChange}
                   onBlur={() => handleBlur("company")}
-                  placeholder="Liecon"
+                  placeholder="Jhonnathan"
                   className={cn(touched.company && !broker.company && "border-red-500 focus-visible:ring-red-500")}
                 />
                 {touched.company && !broker.company && <p className="text-sm text-red-500">Empresa é obrigatória</p>}
@@ -222,7 +222,7 @@ export default function BrokerForm() {
                   value={broker.email}
                   onChange={handleBrokerChange}
                   onBlur={() => handleBlur("email")}
-                  placeholder="ana.silva@liecon.com.br"
+                  placeholder="ana.silva@jhonnathan.com.br"
                   className={cn(
                     touched.email &&
                       (!broker.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(broker.email)) &&

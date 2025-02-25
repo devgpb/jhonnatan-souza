@@ -65,7 +65,7 @@ export function AboutMission() {
           <div className="space-y-4 sm:space-y-6 text-center md:text-left">
             <h2 className="text-2xl sm:text-3xl font-bold">Nossa Missão</h2>
             <p className="text-base sm:text-lg text-muted-foreground text-justify">
-              A Liecon Negócios Imobiliários nasceu com a missão de proporcionar experiências únicas e um atendimento de excelência para clientes que buscam exclusividade, confiança e um serviço diferenciado. Nossa equipe é composta por profissionais altamente treinados, prontos para oferecer o melhor em compra, venda, revenda, locação e administração de imóveis nos melhores bairros de São Paulo.
+              A Jhonnathan Negócios Imobiliários nasceu com a missão de proporcionar experiências únicas e um atendimento de excelência para clientes que buscam exclusividade, confiança e um serviço diferenciado. Nossa equipe é composta por profissionais altamente treinados, prontos para oferecer o melhor em compra, venda, revenda, locação e administração de imóveis nos melhores bairros de São Paulo.
             </p>
             <p className="text-base sm:text-lg text-muted-foreground text-justify">
               Acreditamos que a tecnologia combinada com atendimento personalizado é a chave para revolucionar o mercado imobiliário e transformar a experiência de compra e venda de imóveis de alto padrão, trazendo transparência, profissionalismo e excelência em todas as etapas do processo.

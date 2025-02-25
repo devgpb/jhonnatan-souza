@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Menu, Search, X, User, ArrowRight, Building2, Home, Building, ChevronDown } from "lucide-react"
 import { Button } from "./ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
+import Image from "next/image"
 
 const propertyTypes = [
   {
@@ -72,7 +73,12 @@ export function NavBar() {
     <header className="fixed top-0 left-0 w-full bg-transparent z-50">
       <div className="container flex h-20 items-center justify-between">
         <Link href="/" className="font-bold text-3xl tracking-tight text-white font-bold drop-shadow-[0_0_1px_rgba(0,0,0,1)]">
-          Liecon
+          <Image
+            src={"/marca/icone.svg"}
+            alt={"Logo Jhonnatan"}
+            width={80}
+            height={60}
+          />
         </Link>
 
         <nav className="hidden md:flex items-center gap-10">

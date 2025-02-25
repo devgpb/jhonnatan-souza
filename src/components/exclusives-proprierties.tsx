@@ -20,7 +20,7 @@ const properties = [
     location: "Cobertura em Jardim América, São Paulo - SP",
     agent: {
       name: "Anna Gama",
-      company: "Liecon",
+      company: "Jhonnathan",
       avatar: "/images/corretores/user-02.png",
     },
   },
@@ -63,7 +63,7 @@ const properties = [
     location: "Cobertura em Moema, São Paulo - SP",
     agent: {
       name: "Pedro Silva",
-      company: "Liecon",
+      company: "Jhonnathan",
       avatar: "/images/corretores/user-02.png",
     },
   },
@@ -105,7 +105,7 @@ const properties = [
     location: "Apartamento no Itaim, São Paulo - SP",
     agent: {
       name: "Laura Costa",
-      company: "Liecon",
+      company: "Jhonnathan",
       avatar: "/images/corretores/user-02.png",
     },
   },
@@ -215,8 +215,8 @@ export function ExclusiveProperties() {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mb-6 sm:mb-8">Exclusivos Liecon</h2>
-            <p className="text-gray-400">Imóveis únicos, listados apenas no Liecon.</p>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mb-6 sm:mb-8">Exclusivos Jhonnathan</h2>
+            <p className="text-gray-400">Imóveis únicos, listados apenas no Jhonnathan.</p>
           </div>
         </div>
 

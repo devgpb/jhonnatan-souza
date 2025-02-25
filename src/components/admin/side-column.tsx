@@ -25,7 +25,7 @@ export function SideColumn() {
   return (
     <div className="w-64 h-screen border-r border-gray-300 bg-[#F7F7F7] flex flex-col fixed left-0 top-0">
       <div className="border-b bg-white">
-        <h1 className="px-4 py-4 text-xl font-semibold">Liecon Admin</h1>
+        <h1 className="px-4 py-4 text-xl font-semibold">Jhonnathan Admin</h1>
       </div>
 
       <div className="flex-1 p-4 space-y-4">

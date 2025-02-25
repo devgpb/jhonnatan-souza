@@ -56,10 +56,10 @@ O condomínio oferece:
   ],
   broker: {
     name: "Ana Silva",
-    company: "Liecon",
+    company: "Jhonnathan",
     creci: "123456",
     phone: "+55 11 99999-9999",
-    email: "ana.silva@liecon.com.br",
+    email: "ana.silva@jhonnathan.com.br",
     avatar: "/placeholder.svg?height=400&width=400",
   },
 }

@@ -17,7 +17,7 @@ export default function LoginComponent() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">Liecon</h2>
+            <h2 className="text-3xl font-extrabold text-gray-900">Jhonnathan</h2>
             <p className="mt-2 text-sm text-gray-600">Sistema Administrativo</p>
           </div>
         </CardHeader>

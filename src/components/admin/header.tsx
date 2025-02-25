@@ -19,7 +19,7 @@ export function AdminHeader() {
     <header className="bg-white border-b sticky top-0 z-40">
       <div className="px-8 flex h-16 items-center">
         <Link href="/admin" className="font-bold text-xl">
-          Liecon Admin
+          Jhonnathan Admin
         </Link>
         <nav className="flex items-center gap-1 ml-8">
           {navigation.map((item) => {

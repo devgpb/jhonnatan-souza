@@ -9,7 +9,7 @@ export function Footer() {
           {/* Logo and Description */}
           <div className="col-span-12 lg:col-span-4 space-y-6">
             <Link href="/" className="inline-block">
-              <h2 className="text-2xl font-bold">Liecon</h2>
+              <h2 className="text-2xl font-bold">Jhonnathan</h2>
             </Link>
             <p className="text-gray-400 leading-relaxed">
               Conectamos compradores e vendedores a corretores especialistas com acesso ao maior portfólio de imóveis de
@@ -17,7 +17,7 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-4">
               <a
-                href="https://instagram.com/liecon"
+                href="https://instagram.com/jhonnathan"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary transition-colors"
@@ -95,8 +95,8 @@ export function Footer() {
                 </a>
               </div>
               <div>
-                <a href="mailto:contato@liecon.com.br" className="text-gray-400 hover:text-white transition-colors">
-                  contato@liecon.com.br
+                <a href="mailto:contato@jhonnathan.com.br" className="text-gray-400 hover:text-white transition-colors">
+                  contato@jhonnathan.com.br
                 </a>
               </div>
               <p className="text-gray-400">
@@ -112,7 +112,7 @@ export function Footer() {
         <div className="border-t border-gray-800 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-gray-400">
-              © {new Date().getFullYear()} Liecon. CRECI 39836-J. Todos os direitos reservados.
+              © {new Date().getFullYear()} Jhonnathan. CRECI 39836-J. Todos os direitos reservados.
             </div>
             <div className="flex items-center gap-6">
               <Link href="/privacidade" className="text-sm text-gray-400 hover:text-white transition-colors">

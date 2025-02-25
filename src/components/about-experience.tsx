@@ -30,7 +30,7 @@ export function AboutExperience() {
           </h2>
           <p className="text-lg text-muted-foreground">
             Imobiliárias têm visibilidade limitada e portfólios restritos, enquanto outros portais priorizam volume. O
-            Liecon une um portfólio exclusivo à expertise de corretores especialistas.
+            Jhonnathan une um portfólio exclusivo à expertise de corretores especialistas.
           </p>
         </div>
 
