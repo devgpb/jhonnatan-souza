@@ -199,7 +199,7 @@ export function ExclusiveProperties() {
   }
 
   return (
-    <section className="bg-black py-12 sm:py-16">
+    <section  style={{ backgroundColor: "#132e30" }} className="py-12 sm:py-16">
       <div className="container px-4 sm:px-6">
         {/* Cabeçalho */}
         <div className="flex items-center gap-4 mb-8">
@@ -207,7 +207,7 @@ export function ExclusiveProperties() {
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M9 5L16 12L9 19"
-                stroke="#D4B78F"
+                stroke="#fabc3f"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -215,8 +215,10 @@ export function ExclusiveProperties() {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mb-6 sm:mb-8">Exclusivos Jhonnathan</h2>
-            <p className="text-gray-400">Imóveis únicos, listados apenas no Jhonnathan.</p>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mb-6 sm:mb-8" style={{ color: "#fabc3f" }}
+            >Exclusivos Jhonnathan</h2>
+            <p className="text-gray-400" style={{ color: "#fabc3f" }}
+            >Imóveis únicos, listados apenas no Jhonnathan.</p>
           </div>
         </div>
 
