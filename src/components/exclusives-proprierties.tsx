@@ -235,7 +235,7 @@ export function ExclusiveProperties() {
                   style={{ gridTemplateColumns: `repeat(${groupSize}, minmax(0, 1fr))` }}
                 >
                   {group.map((property) => (
-                    <Card key={property.id} className="cursor-pointer bg-black border-gray-800 overflow-hidden group"
+                    <Card key={property.id}  style={{ backgroundColor: "#1c3e40" }} className="cursor-pointer  border-gray-800 overflow-hidden group"
                     onClick={() => router.push(`/imovel/${property.id}`)}>
                       <div className="relative">
                         {/* Imagem e badge */}
@@ -269,15 +269,15 @@ export function ExclusiveProperties() {
                       <div className="p-4">
                         <div className="space-y-2">
                           <p className="text-xl sm:text-2xl font-semibold text-white">{formatPrice(property.price)}</p>
-                          <div className="flex gap-2 text-gray-400 text-sm">
+                          <div className="flex gap-2 text-sm" style={{ color: "#fabc3f" }}>
                             <span>{property.area}m² área útil</span>
                             <span>•</span>
                             <span>{property.suites} suítes</span>
                             <span>•</span>
                             <span>{property.parking} vagas</span>
                           </div>
-                          <p className="text-gray-400 text-sm sm:text-base">{property.location}</p>
-                          <p className="text-gray-400 text-sm sm:text-base">{property.id}</p>
+                          <p className="text-gray-400 text-sm sm:text-base" style={{ color: "#fabc3f" }}>{property.location}</p>
+                          <p className="text-gray-400 text-sm sm:text-base" style={{ color: "#fabc3f" }}>{property.id}</p>
                         </div>
                       </div>
                     </Card>
