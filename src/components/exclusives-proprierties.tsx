@@ -235,7 +235,7 @@ export function ExclusiveProperties() {
                   style={{ gridTemplateColumns: `repeat(${groupSize}, minmax(0, 1fr))` }}
                 >
                   {group.map((property) => (
-                    <Card key={property.id}  style={{ backgroundColor: "#1c3e40" }} className="cursor-pointer  border-gray-800 overflow-hidden group"
+                    <Card key={property.id}  style={{ backgroundColor: "#1c3e40" }} className="cursor-pointer  border-yellow-800 overflow-hidden group"
                     onClick={() => router.push(`/imovel/${property.id}`)}>
                       <div className="relative">
                         {/* Imagem e badge */}
