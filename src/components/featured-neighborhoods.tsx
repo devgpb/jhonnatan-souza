@@ -84,8 +84,8 @@ export function FeaturedNeighborhoods() {
   
 
   return (
-    <section className="py-12 sm:py-16 container px-4 sm:px-6 md:px-8">
-      <h2 className="text-lg sm:text-xl md:text-2xl font-medium mb-6 md:mb-12">Bairros em destaque</h2>
+    <section  className="py-12 sm:py-16 container px-4 sm:px-6 md:px-8" >
+      <h2 className="text-lg sm:text-xl md:text-2xl font-medium mb-6 md:mb-12" >Bairros em destaque</h2>
 
       {/* Tags dos bairros */}
       <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
@@ -94,10 +94,10 @@ export function FeaturedNeighborhoods() {
             key={tag}
             variant="outline"
             onClick={() => handleTagClick(tag)}
-            className={`rounded-full px-3 py-1 text-sm sm:text-base transition-colors ${
+            className={`rounded-full px-3 py-1 text-sm sm:text-base text-green-900 transition-colors ${
               currentSlide === index
-                ? "bg-black text-white"
-                : "hover:bg-black hover:text-white"
+                ? "bg-black text-yellow-600"
+                : "hover:bg-black hover:text-yellow-600"
             }`}
           >
             {tag}
@@ -149,7 +149,7 @@ export function FeaturedNeighborhoods() {
                     onMouseEnter={() => setHoveredCard(property.id)}
                     onMouseLeave={() => setHoveredCard(null)}
                   >
-                    <div className="relative aspect-[4/3]">
+                    <div className="relative aspect-[4/3]" >
                       <Image
                         src={property.image || "/placeholder.svg"}
                         alt={property.type}
@@ -206,7 +206,7 @@ export function FeaturedNeighborhoods() {
             <ArrowRight className="ml-2 h-4 sm:h-5 w-4 sm:w-5" />
           </Button>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 sm:gap-4" style={{ color: "#1c3e40" }}>
             <div className="flex gap-2">
               {neighborhoods.map((_, index) => (
                 <button

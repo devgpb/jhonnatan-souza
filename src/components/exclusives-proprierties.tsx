@@ -321,7 +321,7 @@ export function ExclusiveProperties() {
 
           <Button
             variant="ghost"
-            className="text-[#D4B78F] hover:text-[#D4B78F] hover:bg-[#D4B78F]/10 px-6 py-3 text-lg font-medium border border-[#D4B78F]/20 hover:border-[#D4B78F]/40 transition-all duration-300"
+            className="text-[#fabc3f] hover:text-[#fabc3f] hover:bg-[#fabc3f]/10 px-6 py-3 text-lg font-medium border border-[#fabc3f]/20 hover:border-[#fabc3f]/40 transition-all duration-300"
           >
             Ver todos
             <svg className="ml-2 h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
