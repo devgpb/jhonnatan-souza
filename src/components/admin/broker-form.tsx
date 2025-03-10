@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label"
 import { IMaskInput } from "react-imask"
 import { AlertCircle, Check, ImageIcon, Loader2, Upload, X } from "lucide-react"
 import { brokerService } from "@/services/BrokerService"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import { supabase } from '@/lib/supabase';
+
 
 interface BrokerValues {
   name: string
@@ -18,6 +20,7 @@ interface BrokerValues {
   creci: string
   phone: string
   email: string
+  avatar?: string
 }
 
 const initialValues: BrokerValues = {
@@ -77,6 +80,18 @@ export default function BrokerForm() {
     setAvatarPreview(null)
   }
 
+   const uploadAvatar = async (file: File) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${broker.name}-${Math.random()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+    
+      const { data, error } = await supabase.storage.from('avatars').upload(filePath, file);
+      if (error) throw error;
+    
+      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      return publicUrlData.publicUrl;
+    };
+
   const validateForm = () => {
     const errors: Partial<Record<keyof BrokerValues, string>> = {}
 
@@ -116,7 +131,12 @@ export default function BrokerForm() {
     setStatus({ type: null, message: "" })
 
     try {
-      await brokerService.createBroker(broker, avatar)
+      // await brokerService.createBroker(broker, avatar)
+      if (avatar) {
+        const avatarUrl = await uploadAvatar(avatar);
+        broker.avatar = avatarUrl;
+      }
+      await brokerService.createBroker(broker)
       setStatus({
         type: "success",
         message: "Corretor cadastrado com sucesso!",

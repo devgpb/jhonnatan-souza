@@ -25,7 +25,7 @@ export interface Broker {
     parking?: number
     description?: string
     amenities: string[]
-    brokerId?: string
+    broker_id?: string
     broker?: Broker
     images: PropertyImage[]
   }

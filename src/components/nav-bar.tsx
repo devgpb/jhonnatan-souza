@@ -246,9 +246,9 @@ export function NavBar({ background = false }: NavBarProps) {
             variant="ghost"
             size="icon"
             onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="h-12 w-12"
+            className="h-12 w-12 text-[#fabc3f]"
           >
-            <Search className="h-6 w-6" />
+            <Search className="h-6 w-6 text-inherit"  />
           </Button>
 
           <Link

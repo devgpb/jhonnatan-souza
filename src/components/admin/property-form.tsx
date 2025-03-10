@@ -33,7 +33,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { IMaskInput } from "react-imask"
 import { cn } from "@/lib/utils"
 import { brokerService } from "@/services/BrokerService"
+import { propertyService } from "@/services/PropertyService"
 import axios from "axios"
+import { supabase } from '@/lib/supabase';
 
 interface PropertyValues {
   id: string
@@ -49,7 +51,7 @@ interface PropertyValues {
   bathrooms: string
   parking: string
   description: string
-  brokerId: string
+  broker_id: string
 }
 
 interface Broker {
@@ -76,9 +78,9 @@ function BrokerSelect({ brokers, value, onValueChange }: BrokerSelectProps) {
   return (
     <Select.Root value={value} onValueChange={onValueChange}>
       <Select.Trigger className="w-full inline-flex items-center justify-between rounded-md border border-input bg-background px-3 h-10">
-        <Select.Value placeholder="Selecione um corretor">
-          {value ? brokers.find((b) => b.id === value)?.name : "Selecione um corretor"}
-        </Select.Value>
+      <Select.Value placeholder="Selecione um corretor">
+        {value ? brokers.find((b) => String(b.id) === value)?.name : "Selecione um corretor"}
+      </Select.Value>
         <Select.Icon>
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Select.Icon>
@@ -99,8 +101,7 @@ function BrokerSelect({ brokers, value, onValueChange }: BrokerSelectProps) {
               {filteredBrokers.length > 0 ? (
                 filteredBrokers.map((broker) => (
                   <Select.Item
-                    key={broker.id}
-                    value={broker.id}
+                  key={broker.id} value={String(broker.id)}
                     className="relative flex items-center px-8 py-2 rounded-sm text-sm cursor-default hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground outline-none"
                   >
                     <Select.ItemText>{broker.name}</Select.ItemText>
@@ -134,7 +135,7 @@ const initialValues: PropertyValues = {
   bathrooms: "",
   parking: "",
   description: "",
-  brokerId: "",
+  broker_id: "",
 }
 
 export default function PropertyForm() {
@@ -157,6 +158,7 @@ export default function PropertyForm() {
   const fetchBrokers = async () => {
     try {
       const brokers = await brokerService.getBrokers()
+      console.log(brokers)
       setBrokers(brokers)
     } catch (error) {
       console.error("Erro ao carregar corretores:", error)
@@ -224,10 +226,22 @@ export default function PropertyForm() {
     if (!formValues.location) errors.location = "Localização é obrigatória"
     if (!formValues.price) errors.price = "Preço é obrigatório"
     if (!formValues.area) errors.area = "Área é obrigatória"
-    if (!formValues.brokerId) errors.brokerId = "Corretor é obrigatório"
+    if (!formValues.broker_id) errors.broker_id = "Corretor é obrigatório"
 
     return errors
   }
+
+   const uploadPropertyImage = async (file: File) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `${formValues.id}/${fileName}`;
+    
+      const { data, error } = await supabase.storage.from('property-images').upload(filePath, file);
+      if (error) throw error;
+    
+      const { data: { publicUrl } } = supabase.storage.from('property-images').getPublicUrl(filePath);
+      return publicUrl;
+    };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -255,23 +269,24 @@ export default function PropertyForm() {
     setStatus({ type: null, message: "" })
 
     try {
-      const formData = new FormData()
-      Object.entries(formValues).forEach(([key, value]) => {
-        formData.append(key, value.toString())
-      })
-
-      formData.append("amenities", tags.join(","))
-      images.forEach((file) => formData.append("images", file))
-
-      await axios.post("http://localhost:3001/property", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-            setUploadProgress(percent)
-          }
-        },
-      })
+      const imageUrls = await Promise.all(images.map(file => uploadPropertyImage(file)))
+       
+      
+      const propertyData = {
+        ...formValues,
+        amenities: tags.join(","),
+        images: imageUrls,
+        price: formValues.price ? parseFloat(formValues.price) : null,
+        area: formValues.area ? parseFloat(formValues.area) : null,
+        iptu: formValues.iptu ? parseFloat(formValues.iptu) : null,
+        year: formValues.year ? parseInt(formValues.year, 10) : null,
+        bedrooms: formValues.bedrooms ? parseInt(formValues.bedrooms, 10) : 0,
+        bathrooms: formValues.bathrooms ? parseInt(formValues.bathrooms, 10) : 0,
+        parking: formValues.parking ? parseInt(formValues.parking, 10) : 0,
+        // sold fica como está (bool), ou você pode adicionar um checkbox no form se quiser mudar.
+      }
+  
+      await propertyService.createProperty(propertyData);
 
       setStatus({
         type: "success",
@@ -580,10 +595,10 @@ export default function PropertyForm() {
               </Label>
               <BrokerSelect
                 brokers={brokers}
-                value={formValues.brokerId}
-                onValueChange={(value) => setFormValues((prev) => ({ ...prev, brokerId: value }))}
+                value={formValues.broker_id}
+                onValueChange={(value) => setFormValues((prev) => ({ ...prev, broker_id: value }))}
               />
-              {touched.brokerId && !formValues.brokerId && (
+              {touched.broker_id && !formValues.broker_id && (
                 <p className="text-sm text-red-500">Corretor é obrigatório</p>
               )}
             </div>

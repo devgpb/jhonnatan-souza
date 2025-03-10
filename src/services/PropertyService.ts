@@ -1,35 +1,22 @@
 // services/propertyService.ts
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error("API_URL não está definida no .env");
-}
+const API_BASE = "/api/properties";
 
 export const propertyService = {
   async createProperty(data: any) {
-    /**
-     * Se você estiver enviando arquivos, use FormData.
-     * Aqui, assumimos que 'data' pode conter tanto campos quanto arquivos.
-     */
-    const formData = new FormData();
-    Object.keys(data).forEach((key) => {
-      formData.append(key, data[key]);
-    });
-
-    const response = await fetch(`${API_URL}/property`, {
+    const response = await fetch(`${API_BASE}`, {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
-
     if (!response.ok) {
-      throw new Error("Erro ao criar propriedade");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Erro ao criar propriedade");
     }
     return response.json();
   },
 
   async getProperties() {
-    const response = await fetch(`${API_URL}/property`);
+    const response = await fetch(`${API_BASE}`);
     if (!response.ok) {
       throw new Error("Erro ao buscar propriedades");
     }
@@ -37,7 +24,7 @@ export const propertyService = {
   },
 
   async getPropertyById(id: string) {
-    const response = await fetch(`${API_URL}/property/${id}`);
+    const response = await fetch(`${API_BASE}/${id}`);
     if (!response.ok) {
       throw new Error("Erro ao buscar propriedade");
     }
@@ -45,7 +32,7 @@ export const propertyService = {
   },
 
   async updateProperty(id: string, data: any) {
-    const response = await fetch(`${API_URL}/property/${id}`, {
+    const response = await fetch(`${API_BASE}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +47,7 @@ export const propertyService = {
   },
 
   async deleteProperty(id: string) {
-    const response = await fetch(`${API_URL}/property/${id}`, {
+    const response = await fetch(`${API_BASE}/${id}`, {
       method: "DELETE",
     });
     if (!response.ok) {

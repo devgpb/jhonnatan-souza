@@ -1,15 +1,28 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { useRouter } from 'next/router'
-
+import { useState } from "react";
+import { useRouter } from "next/router";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 
 export default function LoginComponent() {
-  const router = useRouter()
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
-  function handleLogin() {
-    // redirect to admin page
-    router.push('/admin/listagem')
+  async function handleLogin(e: { preventDefault: () => void; }) {
+    e.preventDefault();
+
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, senha }),
+    });
+
+    if (response.ok) {
+      router.push("/admin/listagem");
+    } else {
+      alert("Credenciais inválidas!");
+    }
   }
 
   return (
@@ -22,24 +35,24 @@ export default function LoginComponent() {
           </div>
         </CardHeader>
         <CardContent>
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={handleLogin}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
+              <label htmlFor="Login" className="block text-sm font-medium text-gray-700">
+                Login
               </label>
               <div className="mt-1">
                 <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="Login"
+                  name="Login"
+                  type="text"
+                  autoComplete="username"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Seu email"
+                  placeholder="Seu login"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
-
             <div>
               <label htmlFor="senha" className="block text-sm font-medium text-gray-700">
                 Senha
@@ -48,15 +61,15 @@ export default function LoginComponent() {
                 <Input
                   id="senha"
                   name="senha"
-                  type="senha"
-                  autoComplete="current-senha"
+                  type="password"
+                  autoComplete="current-password"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   placeholder="Sua senha"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
                 />
               </div>
             </div>
-
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -69,26 +82,18 @@ export default function LoginComponent() {
                   Lembrar de mim
                 </label>
               </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  Esqueceu sua senha?
-                </a>
-              </div>
             </div>
+            <CardFooter>
+              <Button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Entrar
+              </Button>
+            </CardFooter>
           </form>
         </CardContent>
-        <CardFooter>
-          <Button
-            type="submit"
-            onClick={handleLogin}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Entrar
-          </Button>
-        </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-

@@ -78,17 +78,17 @@ export function HeroSection() {
 
       <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
         <div className="text-center text-white space-y-4 sm:space-y-6 max-w-4xl px-2">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight" style={{ color: "#fabc3f" }}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight" 
           >
             <Typewriter text={slides[currentSlide].title} />
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl font-light" style={{ color: "#fabc3f" }}
+          <p className="text-lg sm:text-xl md:text-2xl font-light" 
           >
             {slides[currentSlide].description}
           </p>
         </div>
 
-        <Button className="mt-6 sm:mt-8 px-12 py-6 border border-yellow-600 text-white bg-transparent hover:bg-yellow/10 text-lg sm:text-xl font-semibold rounded-md" style={{ color: "#fabc3f" }}>
+        <Button className="mt-6 sm:mt-8 px-12 py-6 border border-yellow-600 text-white bg-transparent hover:bg-yellow/10 text-lg sm:text-xl font-semibold rounded-md" >
           Veja os imóveis
         </Button>
       </div>
