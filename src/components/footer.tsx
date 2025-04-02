@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Instagram } from "lucide-react"
 import Image from "next/image"
+import EnterLogo from "./ui/enter-logo"
 
 export function Footer() {
   return (
@@ -10,14 +11,8 @@ export function Footer() {
           {/* Logo and Description */}
           <div className="col-span-12 lg:col-span-4 space-y-6">
             <div className=" h-[200px]">
-            <Link href="/" className="inline-block">
-              <Image
-                src={"/marca/marca.svg"}
-                alt={"Logo Jhonnatan"}
-                width={300}
-                height={100}
-                className="object-cover"
-              />
+            <Link href="/" className="inline-block" style={{ height: 120 }}>
+              <EnterLogo className="w-full h-full" />
             </Link>
             </div>
             <p className="text-gray-400 leading-relaxed">

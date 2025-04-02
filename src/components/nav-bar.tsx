@@ -15,7 +15,8 @@ import {
 } from "lucide-react"
 import { Button } from "./ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
-import Image from "next/image"
+import Image from "next/image";
+import EnterLogo from "./ui/enter-logo"
 
 // Tipar as propriedades, permitindo receber "background"
 interface NavBarProps {
@@ -129,14 +130,9 @@ export function NavBar({ background = false }: NavBarProps) {
       <Link
         href="/"
         className="font-bold text-2xl sm:text-3xl mt-2 tracking-tight text-white drop-shadow-[0_0_1px_rgba(0,0,0,1)] flex items-center"
+        style={{height: '100%'}}
       >
-        <Image
-          src="/marca/icone.svg"
-          alt="Logo Jhonnatan"
-          width={50}
-          height={50}
-          className="w-10 h-auto sm:w-12"
-        />
+        <EnterLogo/>
       </Link>
 
 
