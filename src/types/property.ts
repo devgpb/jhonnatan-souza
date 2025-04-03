@@ -1,5 +1,5 @@
 export interface Broker {
-    id: string
+    id?: string
     name: string
     company?: string
     creci?: string

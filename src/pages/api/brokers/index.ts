@@ -7,11 +7,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   switch (method) {
     case 'GET': {
-      // Listar todos os Brokers
+      // Listar todos os Brokers (somente os que NÃO foram soft-deletados)
       const { data, error } = await supabase
         .from('brokers')
         .select('*')
-
+        .is('deleted_at', null) // <- filtra apenas quem tem deleted_at = NULL
 
       if (error) {
         return res.status(400).json({ error: error.message })
@@ -22,14 +22,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     case 'POST': {
       // Criar novo Broker
-      const { name, creci } = req.body
-
+      // updated_at e created_at têm default no banco.
       const { data, error } = await supabase
         .from('brokers')
-        .insert([req.body])
+        .insert([req.body]) // O req.body deve conter name, creci, etc.
         .single()
-
-      console.log(error)
 
       if (error) {
         return res.status(400).json({ error: error.message })

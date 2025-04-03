@@ -18,6 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .from('brokers')
         .select('*')
         .eq('id', broker_id)
+        .is('deleted_at', null)
         .single()
 
       if (error || !data) {
@@ -31,40 +32,46 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Atualizar Broker
       const { name, creci } = req.body
       const fieldsToUpdate: Record<string, unknown> = {}
+    
       if (name) fieldsToUpdate.name = name
       if (creci) fieldsToUpdate.creci = creci
-
+    
+      // atualiza a data
+      fieldsToUpdate.updated_at = new Date()
+    
       if (Object.keys(fieldsToUpdate).length === 0) {
         return res.status(400).json({ error: 'Nada para atualizar.' })
       }
-
+    
       const { data, error } = await supabase
         .from('brokers')
         .update(fieldsToUpdate)
         .eq('id', broker_id)
         .single()
-
+    
       if (error) {
         return res.status(400).json({ error: error.message })
       }
-
+    
       return res.status(200).json(data)
     }
+    
 
     case 'DELETE': {
-      // Excluir Broker
+      // Excluir (soft delete)
       const { data, error } = await supabase
         .from('brokers')
-        .delete()
+        .update({ deleted_at: new Date() })
         .eq('id', broker_id)
         .single()
-
+    
       if (error) {
         return res.status(400).json({ error: error.message })
       }
-
+    
       return res.status(200).json(data)
     }
+    
 
     default:
       return res.status(405).json({ error: 'Método não suportado' })
