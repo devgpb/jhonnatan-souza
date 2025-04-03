@@ -9,6 +9,7 @@ import type { Property } from "@/types/property"
 import ActionButton from "@/components/ui/action-button"
 import { propertyService } from "@/services/PropertyService"
 import { TableFilter } from "./table-filter"
+import { brokerService } from "@/services/BrokerService"
 
 interface PropertiesTableProps {
   properties: Property[]
@@ -33,10 +34,18 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
   const [currentPage, setCurrentPage] = useState(1)
   const [filteredProperties, setFilteredProperties] = useState(properties)
   const itemsPerPage = 10
+  const [brokersList, setBrokersList] = useState<{ id: string; name: string }[]>([])
 
   useEffect(() => {
     setFilteredProperties(properties)
   }, [properties])
+
+  useEffect(() => {
+    brokerService.getBrokers().then((data:any) => {
+      const mapped = data.map((b: any) => ({ id: String(b.id), name: b.name }))
+      setBrokersList(mapped)
+    })
+  }, [])
 
   const handleFilter = (filters: TableFilters) => {
     let filtered = [...properties]
@@ -48,7 +57,7 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
         (property) =>
           property.title?.toLowerCase().includes(searchLower) ||
           property.location?.toLowerCase().includes(searchLower) ||
-          property.broker?.name.toLowerCase().includes(searchLower),
+          property.brokers?.name.toLowerCase().includes(searchLower),
       )
     }
 
@@ -108,7 +117,9 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
 
     // Apply broker filter
     if (filters.brokers.length > 0) {
-      filtered = filtered.filter((property) => filters.brokers.includes(property.broker?.id || ""))
+      filtered = filtered.filter((property) =>
+        filters.brokers.includes(String(property.brokers?.id || "")),
+      )
     }
 
     setFilteredProperties(filtered)
@@ -151,16 +162,14 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
 
   // Get unique brokers from properties
   const brokers = Array.from(
-    new Set(properties.map((p) => p.broker).filter((b): b is NonNullable<typeof b> => b !== undefined)),
+    new Set(properties.map((p) => p.brokers).filter((b): b is NonNullable<typeof b> => b !== undefined)),
   )
 
   return (
     <div className="space-y-4">
       <TableFilter
         onFilter={handleFilter}
-        brokers={brokers
-          .filter((broker) => broker.id !== undefined)
-          .map((broker) => ({ id: broker.id as string, name: broker.name }))}
+        brokers={brokersList}
       />
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
