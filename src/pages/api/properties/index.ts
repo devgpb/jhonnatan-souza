@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-
+      console.log(error)
       if (error) {
         return res.status(400).json({ error: error.message })
       }

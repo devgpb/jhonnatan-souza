@@ -12,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .from('brokers')
         .select('*')
 
+
       if (error) {
         return res.status(400).json({ error: error.message })
       }
@@ -27,6 +28,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .from('brokers')
         .insert([req.body])
         .single()
+
+      console.log(error)
 
       if (error) {
         return res.status(400).json({ error: error.message })
