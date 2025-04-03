@@ -3,7 +3,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabase } from '@/lib/supabase'
 
-export default async function handler(req, res) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" })
   }
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     const previousEndDate = new Date(startDate)
 
     // Preparar os filtros (ajuste conforme o seu schema, por exemplo, adicionando filtros de "type" ou "region")
-    const baseFilters = (query, fromDate, toDate) =>
+    const baseFilters = (query: any, fromDate: Date, toDate: Date) =>
       query
         .gte("created_at", fromDate.toISOString())
         .lte("created_at", toDate.toISOString())
@@ -66,8 +66,8 @@ export default async function handler(req, res) {
     if (previousCountError) throw previousCountError
 
     const salesTrend =
-      previousPeriodSales > 0
-        ? Math.round(((currentPeriodSales - previousPeriodSales) / previousPeriodSales) * 100)
+      (previousPeriodSales ?? 0) > 0
+        ? Math.round((((currentPeriodSales ?? 0) - (previousPeriodSales ?? 0)) / (previousPeriodSales ?? 1)) * 100)
         : 100
 
     // Calcular receita total para os períodos (buscando os registros e somando no servidor)
@@ -119,7 +119,7 @@ export default async function handler(req, res) {
     if (brokerError) throw brokerError
 
     // Agrupar vendas por broker_id
-    const brokerPerformanceMap = {}
+    const brokerPerformanceMap: { [key: string]: number } = {}
     brokerData.forEach((item) => {
       if (item.broker_id) {
         brokerPerformanceMap[item.broker_id] = (brokerPerformanceMap[item.broker_id] || 0) + 1
@@ -127,7 +127,7 @@ export default async function handler(req, res) {
     })
 
     const brokerIds = Object.keys(brokerPerformanceMap)
-    let brokers = []
+    let brokers: { id: string; name: string; creci: string }[] = []
     if (brokerIds.length > 0) {
       const { data: brokersData, error: brokersError } = await supabase
         .from("brokers")
@@ -137,7 +137,7 @@ export default async function handler(req, res) {
       brokers = brokersData
     }
 
-    const brokerMap = {}
+    const brokerMap: { [key: string]: string } = {}
     brokers.forEach((broker) => {
       brokerMap[broker.id] = broker.name
     })
@@ -214,11 +214,11 @@ export default async function handler(req, res) {
       propertyLocation: property.location,
       propertyImage:
         property.images && property.images.length > 0 ? property.images[0] : null,
-      brokerName: property.brokers ? property.brokers.name : "N/A",
-      brokerCreci: property.brokers ? property.brokers.creci : "N/A",
+      brokerName: Array.isArray(property.brokers) && property.brokers.length > 0 ? property.brokers[0].name : "N/A",
+      brokerCreci: Array.isArray(property.brokers) && property.brokers.length > 0 ? property.brokers[0].creci : "N/A",
       value: parseFloat(property.price),
       date: property.updated_at,
-      status: property.sold ? "sold" : property.status,
+      status: property.sold ? "sold" : "available",
     }))
 
     // Dados de resumo
@@ -291,6 +291,9 @@ export default async function handler(req, res) {
     console.error("Dashboard API error:", error)
     res
       .status(500)
-      .json({ message: "Error fetching dashboard data", error: error.message })
+      .json({ 
+        message: "Error fetching dashboard data", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      })
   }
 }

@@ -55,6 +55,7 @@ export default function PropertyMap({ data }: PropertyMapProps) {
     
     // Draw data points
     data.points.forEach(point => {
+      if (!mapRef.current) return;
       const x = (point.x / 100) * mapRef.current.width;
       const y = (point.y / 100) * mapRef.current.height;
       const radius = point.value / 2 + 5; // Scale the radius based on value

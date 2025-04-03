@@ -3,9 +3,14 @@
 import { useEffect, useRef } from "react"
 import Chart from "chart.js/auto"
 
-export default function BrokerPerformance({ data }) {
-  const chartRef = useRef(null)
-  const chartInstance = useRef(null)
+interface BrokerPerformanceData {
+  brokers: string[];
+  sales: number[];
+}
+
+export default function BrokerPerformance({ data }: { data: BrokerPerformanceData }) {
+  const chartRef = useRef<HTMLCanvasElement | null>(null)
+  const chartInstance = useRef<Chart | null>(null)
 
   useEffect(() => {
     if (!data || !chartRef.current) return
@@ -16,6 +21,7 @@ export default function BrokerPerformance({ data }) {
     }
 
     const ctx = chartRef.current.getContext("2d")
+    if (!ctx) return
 
     chartInstance.current = new Chart(ctx, {
       type: "pie",
@@ -57,7 +63,7 @@ export default function BrokerPerformance({ data }) {
                 const label = context.label || ""
                 const value = context.raw || 0
                 const total = context.dataset.data.reduce((a, b) => a + b, 0)
-                const percentage = Math.round((value / total) * 100)
+                const percentage = Math.round((Number(value) / Number(total)) * 100)
                 return `${label}: ${value} vendas (${percentage}%)`
               },
             },
