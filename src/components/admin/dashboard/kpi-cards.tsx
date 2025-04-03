@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, DollarSign, BarChart } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, BarChart, ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 
 interface KpiData {
   monthlySales: {
@@ -20,73 +20,84 @@ interface KpiCardsProps {
 }
 
 export default function KpiCards({ data }: KpiCardsProps) {
-  if (!data) return null;
-  
-  const { monthlySales, totalRevenue, conversionRate } = data;
-  
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value)
+  }
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(1)}%`
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-start">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500">Vendas do Mês</p>
-            <h3 className="text-3xl font-bold mt-1">{monthlySales.count}</h3>
+            <p className="text-sm font-medium text-gray-500">Vendas Mensais</p>
+            <p className="text-2xl font-bold mt-1">{data.monthlySales.count}</p>
           </div>
-          <div className={`p-3 rounded-full ${monthlySales.trend > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-            {monthlySales.trend > 0 ? (
-              <TrendingUp className="h-6 w-6 text-green-600" />
+          <div className={`flex items-center ${data.monthlySales.trend >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {data.monthlySales.trend >= 0 ? (
+              <ArrowUpIcon className="h-5 w-5 mr-1" />
             ) : (
-              <TrendingDown className="h-6 w-6 text-red-600" />
+              <ArrowDownIcon className="h-5 w-5 mr-1" />
             )}
+            <span className="font-medium">{Math.abs(data.monthlySales.trend)}%</span>
           </div>
         </div>
-        <div className="mt-4">
-          <p className={`text-sm ${monthlySales.trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {monthlySales.trend > 0 ? '+' : ''}{monthlySales.trend}% em relação ao mês anterior
-          </p>
+        <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full bg-primary" style={{ width: `${Math.min(100, data.monthlySales.count)}%` }}></div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-start">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-500">Receita Total</p>
-            <h3 className="text-3xl font-bold mt-1">{formatCurrency(totalRevenue.value)}</h3>
+            <p className="text-2xl font-bold mt-1">{formatCurrency(data.totalRevenue.value)}</p>
           </div>
-          <div className={`p-3 rounded-full ${totalRevenue.trend > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-            <DollarSign className={`h-6 w-6 ${totalRevenue.trend > 0 ? 'text-green-600' : 'text-red-600'}`} />
+          <div className={`flex items-center ${data.totalRevenue.trend >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {data.totalRevenue.trend >= 0 ? (
+              <ArrowUpIcon className="h-5 w-5 mr-1" />
+            ) : (
+              <ArrowDownIcon className="h-5 w-5 mr-1" />
+            )}
+            <span className="font-medium">{Math.abs(data.totalRevenue.trend)}%</span>
           </div>
         </div>
-        <div className="mt-4">
-          <p className={`text-sm ${totalRevenue.trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {totalRevenue.trend > 0 ? '+' : ''}{totalRevenue.trend}% em relação ao mês anterior
-          </p>
+        <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary"
+            style={{ width: `${Math.min(100, (data.totalRevenue.value / 1000000) * 100)}%` }}
+          ></div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-start">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-500">Taxa de Conversão</p>
-            <h3 className="text-3xl font-bold mt-1">{conversionRate.value}%</h3>
+            <p className="text-2xl font-bold mt-1">{formatPercentage(data.conversionRate.value)}</p>
           </div>
-          <div className={`p-3 rounded-full ${conversionRate.trend > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-            <BarChart className={`h-6 w-6 ${conversionRate.trend > 0 ? 'text-green-600' : 'text-red-600'}`} />
+          <div className={`flex items-center ${data.conversionRate.trend >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {data.conversionRate.trend >= 0 ? (
+              <ArrowUpIcon className="h-5 w-5 mr-1" />
+            ) : (
+              <ArrowDownIcon className="h-5 w-5 mr-1" />
+            )}
+            <span className="font-medium">{Math.abs(data.conversionRate.trend)}%</span>
           </div>
         </div>
-        <div className="mt-4">
-          <p className={`text-sm ${conversionRate.trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {conversionRate.trend > 0 ? '+' : ''}{conversionRate.trend}% em relação ao mês anterior
-          </p>
+        <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary"
+            style={{ width: `${Math.min(100, data.conversionRate.value * 2)}%` }}
+          ></div>
         </div>
       </div>
     </div>
-  );
+  )
 }

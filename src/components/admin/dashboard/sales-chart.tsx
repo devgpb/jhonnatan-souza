@@ -12,96 +12,136 @@ interface SalesChartProps {
 }
 
 export default function SalesChart({ data }: SalesChartProps) {
-  const chartRef = useRef<HTMLCanvasElement | null>(null);
-  const chartInstance = useRef<Chart | null>(null);
+  const chartRef = useRef<HTMLCanvasElement>(null)
+  const chartInstance = useRef<Chart | null>(null)
 
   useEffect(() => {
-    if (!data || !chartRef.current) return;
+    if (!chartRef.current) return
 
     // Destroy existing chart if it exists
     if (chartInstance.current) {
-      chartInstance.current.destroy();
+      chartInstance.current.destroy()
     }
 
-    const ctx = chartRef.current.getContext('2d');
-    if (!ctx) return;
-    
+    const ctx = chartRef.current.getContext("2d")
+    if (!ctx) return
+
     chartInstance.current = new Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: {
         labels: data.labels,
         datasets: [
           {
-            label: 'Vendas',
+            label: "Vendas",
             data: data.sales,
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.3,
+            borderColor: "rgb(59, 130, 246)",
+            backgroundColor: "rgba(59, 130, 246, 0.1)",
+            borderWidth: 2,
             fill: true,
+            tension: 0.4,
           },
           {
-            label: 'Receita (R$ mil)',
+            label: "Receita (R$)",
             data: data.revenue,
-            borderColor: 'rgb(16, 185, 129)',
-            backgroundColor: 'rgba(16, 185, 129, 0.0)',
-            tension: 0.3,
-            borderDash: [5, 5],
-            yAxisID: 'y1',
-          }
-        ]
+            borderColor: "rgb(16, 185, 129)",
+            backgroundColor: "rgba(16, 185, 129, 0.1)",
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            yAxisID: "y1",
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: "index",
+          intersect: false,
+        },
+        plugins: {
+          legend: {
+            position: "top",
+            labels: {
+              usePointStyle: true,
+              boxWidth: 6,
+            },
+          },
+          tooltip: {
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            titleColor: "#1f2937",
+            bodyColor: "#4b5563",
+            borderColor: "rgba(203, 213, 225, 0.5)",
+            borderWidth: 1,
+            padding: 10,
+            boxPadding: 5,
+            usePointStyle: true,
+            callbacks: {
+              label: (context) => {
+                let label = context.dataset.label || ""
+                if (label) {
+                  label += ": "
+                }
+                if (context.parsed.y !== null) {
+                  if (context.datasetIndex === 1) {
+                    label += new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(context.parsed.y)
+                  } else {
+                    label += context.parsed.y
+                  }
+                }
+                return label
+              },
+            },
+          },
+        },
         scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+          },
           y: {
             beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Número de Vendas'
-            }
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+            ticks: {
+              precision: 0,
+            },
           },
           y1: {
             beginAtZero: true,
-            position: 'right',
+            position: "right",
             grid: {
-              drawOnChartArea: false,
+              display: false,
             },
-            title: {
-              display: true,
-              text: 'Receita (R$ mil)'
-            }
+            ticks: {
+              callback: (value) =>
+                new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                  notation: "compact",
+                  compactDisplay: "short",
+                }).format(Number(value)),
+            },
           },
-          x: {
-            grid: {
-              display: false
-            }
-          }
         },
-        plugins: {
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-          },
-          legend: {
-            position: 'top',
-          }
-        }
-      }
-    });
+      },
+    })
 
     return () => {
       if (chartInstance.current) {
-        chartInstance.current.destroy();
+        chartInstance.current.destroy()
       }
-    };
-  }, [data]);
-
-  if (!data) return <div className="h-64 flex items-center justify-center">Sem dados disponíveis</div>;
+    }
+  }, [data])
 
   return (
-    <div className="h-64">
+    <div className="w-full h-80">
       <canvas ref={chartRef}></canvas>
     </div>
-  );
+  )
 }

@@ -18,78 +18,91 @@ export default function PeriodComparison({ data }: PeriodComparisonProps) {
   const chartInstance = useRef<Chart | null>(null);
 
   useEffect(() => {
-    if (!data || !chartRef.current) return;
+    if (!chartRef.current) return
 
     // Destroy existing chart if it exists
     if (chartInstance.current) {
-      chartInstance.current.destroy();
+      chartInstance.current.destroy()
     }
 
-    const ctx = chartRef.current.getContext('2d');
-    if (!ctx) return;
-    
+    const ctx = chartRef.current.getContext("2d")
+    if (!ctx) return
+
     chartInstance.current = new Chart(ctx, {
-      type: 'bar',
+      type: "bar",
       data: {
         labels: data.categories,
         datasets: [
           {
             label: data.currentPeriodLabel,
             data: data.currentPeriod,
-            backgroundColor: 'rgba(59, 130, 246, 0.7)',
-            borderColor: 'rgb(59, 130, 246)',
-            borderWidth: 1
+            backgroundColor: "rgba(59, 130, 246, 0.8)",
+            borderColor: "rgb(59, 130, 246)",
+            borderWidth: 1,
+            borderRadius: 4,
           },
           {
             label: data.previousPeriodLabel,
             data: data.previousPeriod,
-            backgroundColor: 'rgba(209, 213, 219, 0.7)',
-            borderColor: 'rgb(156, 163, 175)',
-            borderWidth: 1
-          }
-        ]
+            backgroundColor: "rgba(203, 213, 225, 0.8)",
+            borderColor: "rgb(203, 213, 225)",
+            borderWidth: 1,
+            borderRadius: 4,
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Valor (R$)'
-            }
+        plugins: {
+          legend: {
+            position: "top",
+            labels: {
+              usePointStyle: true,
+              boxWidth: 6,
+            },
           },
+          tooltip: {
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            titleColor: "#1f2937",
+            bodyColor: "#4b5563",
+            borderColor: "rgba(203, 213, 225, 0.5)",
+            borderWidth: 1,
+            padding: 10,
+            boxPadding: 5,
+            usePointStyle: true,
+          },
+        },
+        scales: {
           x: {
             grid: {
-              display: false
-            }
-          }
-        },
-        plugins: {
-          tooltip: {
-            mode: 'index',
-            intersect: false,
+              display: false,
+            },
           },
-          legend: {
-            position: 'top',
-          }
-        }
-      }
-    });
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+            ticks: {
+              precision: 0,
+            },
+          },
+        },
+      },
+    })
 
     return () => {
       if (chartInstance.current) {
-        chartInstance.current.destroy();
+        chartInstance.current.destroy()
       }
-    };
-  }, [data]);
-
-  if (!data) return <div className="h-64 flex items-center justify-center">Sem dados disponíveis</div>;
+    }
+  }, [data])
 
   return (
-    <div className="h-64">
+    <div className="w-full h-80">
       <canvas ref={chartRef}></canvas>
     </div>
-  );
+  )
 }
+
