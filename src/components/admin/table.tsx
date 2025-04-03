@@ -155,7 +155,12 @@ export function PropertiesTable({ properties, onDelete }: PropertiesTableProps) 
 
   return (
     <div className="space-y-4">
-      <TableFilter onFilter={handleFilter} brokers={brokers} />
+      <TableFilter
+        onFilter={handleFilter}
+        brokers={brokers
+          .filter((broker) => broker.id !== undefined)
+          .map((broker) => ({ id: broker.id as string, name: broker.name }))}
+      />
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -205,7 +210,7 @@ export function PropertiesTable({ properties, onDelete }: PropertiesTableProps) 
                       {property.sold ? "Vendido" : "Disponível"}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{property.broker?.name || "Não atribuído"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{property.brokers?.name || "Não atribuído"}</td>
                   <td className="px-4 py-3">
                     <ActionButton onClick={() => handleDelete(property)} type="delete" />
                   </td>

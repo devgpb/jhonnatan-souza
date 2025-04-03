@@ -27,6 +27,7 @@ export interface Broker {
     amenities: string[]
     broker_id?: string
     broker?: Broker
+    brokers?: Broker
     images: PropertyImage[]
   }
   

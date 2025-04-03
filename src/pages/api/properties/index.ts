@@ -10,8 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Listar todas as propriedades
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
-      console.log(error)
+        .select('*, brokers(*)') 
+      console.log(data)
       if (error) {
         return res.status(400).json({ error: error.message })
       }
