@@ -9,8 +9,7 @@ import { useRouter } from "next/router"
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: Home },
-  { name: "Cadastrar Imóveis", href: "/admin/cadastro", icon: Building2 },
-  { name: "Listagem", href: "/admin", icon: Building2 },
+  { name: "Imóveis", href: "/admin", icon: Building2 },
   { name: "Corretores", href: "/admin/corretor", icon: Users2 },
   //{ name: "Configurações", href: "/admin/settings", icon: Settings },
 ]

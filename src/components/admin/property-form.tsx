@@ -149,10 +149,15 @@ const initialValues: PropertyValues = {
   broker_id: "",
 }
 
+interface PropertyFormProps {
+  propertyToEdit?: Partial<PropertyValues> | null
+  onSuccess?: () => void
+}
+
 // -----------------------------------------------------------
 // Componente principal de cadastro de Imóvel
 // -----------------------------------------------------------
-export default function PropertyForm() {
+export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyFormProps) {
   const [formValues, setFormValues] = useState<PropertyValues>(initialValues)
   const [brokers, setBrokers] = useState<Broker[]>([])
   const [images, setImages] = useState<File[]>([])
@@ -170,6 +175,16 @@ export default function PropertyForm() {
   useEffect(() => {
     fetchBrokers()
   }, [])
+
+  useEffect(() => {
+    if (propertyToEdit) {
+      setFormValues({
+        ...initialValues,  // ou faz merges, depende do seu state
+        ...propertyToEdit,
+      })
+      // se tiver images etc., você também preenche
+    }
+  }, [propertyToEdit])
 
   const fetchBrokers = async () => {
     try {
@@ -318,7 +333,17 @@ export default function PropertyForm() {
       }
 
       // Cria o imóvel no seu backend via propertyService
-      await propertyService.createProperty(propertyData)
+      let result
+      if (propertyToEdit?.id) {
+        // É edição
+        result = await propertyService.updateProperty(propertyToEdit.id, propertyData)
+        setStatus({ type: "success", message: "Imóvel atualizado com sucesso!" })
+      } else {
+        // É criação
+        result = await propertyService.createProperty(propertyData)
+        setStatus({ type: "success", message: "Imóvel cadastrado com sucesso!" })
+      }
+
 
       setStatus({
         type: "success",

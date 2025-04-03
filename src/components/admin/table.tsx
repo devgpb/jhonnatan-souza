@@ -13,6 +13,7 @@ import { TableFilter } from "./table-filter"
 interface PropertiesTableProps {
   properties: Property[]
   onDelete: () => void
+  onEdit: (property: any) => void
 }
 
 type SortableColumns = "title" | "location" | "price" | "area"
@@ -26,7 +27,7 @@ interface TableFilters {
   search: string
 }
 
-export function PropertiesTable({ properties, onDelete }: PropertiesTableProps) {
+export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTableProps) {
   const [sortColumn, setSortColumn] = useState<SortableColumns>("title")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
   const [currentPage, setCurrentPage] = useState(1)
@@ -212,6 +213,10 @@ export function PropertiesTable({ properties, onDelete }: PropertiesTableProps) 
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{property.brokers?.name || "Não atribuído"}</td>
                   <td className="px-4 py-3">
+                  <ActionButton 
+                    onClick={() => onEdit(property)} 
+                    type="update" 
+                  />
                     <ActionButton onClick={() => handleDelete(property)} type="delete" />
                   </td>
                 </tr>
