@@ -7,10 +7,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   switch (method) {
     case 'GET': {
+      const { page = 1, limit = 6 } = req.query
+
+      const offset = (Number(page) - 1) * Number(limit)
       // Listar todas as propriedades
       const { data, error } = await supabase
         .from('properties')
         .select('*, brokers(*)') 
+        .range(offset, offset + Number(limit) - 1)
       console.log(data)
       if (error) {
         return res.status(400).json({ error: error.message })
