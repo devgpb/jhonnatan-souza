@@ -40,6 +40,7 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",
     "react-imask": "^7.6.1",
+    "react-toastify": "^11.0.5",
     "supabase": "^2.15.8",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7"

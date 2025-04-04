@@ -5,9 +5,8 @@ import { supabase } from '@/lib/supabase'
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { method } = req
   const { id } = req.query
-
-  const propertyId = Number(id)
-  if (!propertyId) {
+  
+  if (!id) {
     return res.status(400).json({ error: 'ID inválido ou ausente.' })
   }
 
@@ -17,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .eq('id', propertyId)
+        .eq('id', id)
         .single()
 
       if (error || !data) {
@@ -43,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data, error } = await supabase
         .from('properties')
         .update(fieldsToUpdate)
-        .eq('id', propertyId)
+        .eq('id', id)
         .single()
 
       if (error) {
@@ -55,10 +54,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     case 'DELETE': {
       // Excluir propriedade
+      console.log(id)
       const { data, error } = await supabase
         .from('properties')
         .delete()
-        .eq('id', propertyId)
+        .eq('id', id)
         .single()
 
       if (error) {

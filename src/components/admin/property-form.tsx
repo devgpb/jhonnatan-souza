@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils"
 import { brokerService } from "@/services/BrokerService"
 import { propertyService } from "@/services/PropertyService"
 import { supabase } from "@/lib/supabase"
+import { IMaskInput } from "react-imask"
 
 // -----------------------------------------------------------
 // Tipos para a lista de corretores e valores do form
@@ -168,12 +169,15 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
+  const [locations, setLocations] = useState<string[]>([])
+  const [searchValue, setSearchValue] = useState("");
 
   // -----------------------------------------------------------
   // 1. Buscar corretores via rota /api/brokers
   // -----------------------------------------------------------
   useEffect(() => {
-    fetchBrokers()
+    fetchBrokers();
+    fetchLocations();
   }, [])
 
   useEffect(() => {
@@ -322,7 +326,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
         amenities: tags.join(","),
         images: imageUrls,
         // Convertendo strings pra número/boolean onde necessário
-        price: formValues.price ? parseFloat(formValues.price) : null,
+        price: formValues.price ? parseCurrency(formValues.price) : null,
         area: formValues.area ? parseFloat(formValues.area) : null,
         iptu: formValues.iptu ? parseFloat(formValues.iptu) : null,
         year: formValues.year ? parseInt(formValues.year, 10) : null,
@@ -366,6 +370,29 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
     }
   }
 
+  // Função para buscar os bairros (distinct) no Supabase
+  async function fetchLocations() {
+    try{
+      const res = await fetch("/api/properties/locations")
+      if (!res.ok) throw new Error(`Request failed with ${res.status}`)
+      const data = await res.json()
+      setLocations(data)  // 'locations' é o state de bairros
+    } catch (err) {
+      console.error("Erro ao buscar locations:", err)
+    }
+  }
+
+  function formatCurrency(value: string) {
+    const onlyDigits = value.replace(/\D/g, "");
+    const number = parseFloat(onlyDigits) / 100;
+    return number.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+  }
+
+  function parseCurrency(value: string) {
+    const normalized = value.replace(/\./g, "").replace(",", ".");
+    return parseFloat(normalized);
+  }
+  
   // -----------------------------------------------------------
   // Renderização do componente
   // -----------------------------------------------------------
@@ -422,20 +449,33 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
               <Label htmlFor="location">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  <span>Localização</span>
+                  <span>Bairro</span>
                 </div>
               </Label>
               <Input
                 id="location"
                 name="location"
                 value={formValues.location}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  setSearchValue(e.target.value);
+                }}
                 onBlur={() => handleBlur("location")}
+                list="locations-list"
                 placeholder="Itaim Bibi, São Paulo - SP"
                 className={cn(touched.location && !formValues.location && "border-red-500 focus-visible:ring-red-500")}
               />
+              <datalist id="locations-list">
+                {locations
+                  .filter((loc) =>
+                    loc.toLowerCase().includes(searchValue.toLowerCase())
+                  )
+                  .map((loc) => (
+                    <option key={loc} value={loc} />
+                  ))}
+              </datalist>
               {touched.location && !formValues.location && (
-                <p className="text-sm text-red-500">Localização é obrigatória</p>
+                <p className="text-sm text-red-500">Bairro é obrigatório</p>
               )}
             </div>
 
@@ -451,7 +491,10 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 id="price"
                 name="price"
                 value={formValues.price}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  const formatted = formatCurrency(e.target.value);
+                  setFormValues((prev) => ({ ...prev, price: formatted }));
+                }}
                 onBlur={() => handleBlur("price")}
                 placeholder="Ex: 450000"
                 className={cn(touched.price && !formValues.price && "border-red-500 focus-visible:ring-red-500")}
