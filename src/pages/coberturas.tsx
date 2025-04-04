@@ -1,169 +1,121 @@
+import { useEffect, useState } from "react"
 import { NavBar } from "@/components/nav-bar"
 import { FilterBar } from "@/components/filter-bar"
 import { PropertyCard } from "@/components/property-card"
 import { Button } from "@/components/ui/button"
-import MainLayout from '@/layouts/MainLayout';
+import MainLayout from '@/layouts/MainLayout'
 
+type Broker = {
+  name: string
+  company?: string
+  avatar?: string
+}
 
-const penthouses = [
-  {
-    id: "BR4800",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 2700000,
-    area: 216,
-    suites: 1,
-    parking: 3,
-    location: "Cobertura em Moema, São Paulo - SP",
-    broker: {
-      name: "Fernando Gaspar",
-      company: "Brand Real Estate",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "LX8901",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 8500000,
-    area: 450,
-    suites: 4,
-    parking: 4,
-    location: "Cobertura em Itaim Bibi, São Paulo - SP",
-    broker: {
-      name: "Ana Paula",
-      company: "Luxury Home",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "HS7654",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 6800000,
-    area: 320,
-    suites: 3,
-    parking: 3,
-    location: "Cobertura em Vila Nova Conceição, São Paulo - SP",
-    broker: {
-      name: "Roberto Carlos",
-      company: "Homesphere",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "SH2345",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 5900000,
-    area: 280,
-    suites: 3,
-    parking: 2,
-    location: "Cobertura em Pinheiros, São Paulo - SP",
-    broker: {
-      name: "Luciana Costa",
-      company: "Singular House",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "LX3456",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 12000000,
-    area: 520,
-    suites: 4,
-    parking: 4,
-    location: "Cobertura nos Jardins, São Paulo - SP",
-    broker: {
-      name: "Pedro Silva",
-      company: "Luxury Home",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "HS8765",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 7200000,
-    area: 350,
-    suites: 3,
-    parking: 3,
-    location: "Cobertura em Moema, São Paulo - SP",
-    broker: {
-      name: "Mariana Santos",
-      company: "Homesphere",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "SH5678",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 9500000,
-    area: 420,
-    suites: 4,
-    parking: 4,
-    location: "Cobertura em Campo Belo, São Paulo - SP",
-    broker: {
-      name: "Ricardo Lima",
-      company: "Singular House",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "LX6789",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 15000000,
-    area: 600,
-    suites: 5,
-    parking: 6,
-    location: "Cobertura em Vila Olímpia, São Paulo - SP",
-    broker: {
-      name: "Fernanda Costa",
-      company: "Luxury Home",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-  {
-    id: "HS9876",
-    image: "/images/imoveis/imovel-3.jpg",
-    price: 11000000,
-    area: 480,
-    suites: 4,
-    parking: 4,
-    location: "Cobertura em Perdizes, São Paulo - SP",
-    broker: {
-      name: "Carlos Eduardo",
-      company: "Homesphere",
-      avatar: "/images/corretores/user-02.png",
-    },
-  },
-]
+type Property = {
+  id: string
+  price: number
+  area: number
+  suites: number
+  parking: number
+  images: string[]
+  location: string
+  title: string
+  brokers: Broker
+}
 
 export default function PenthousesPage() {
-  const handleSearch = (filters:any) => {
+  const [properties, setProperties] = useState<Property[]>([])
+  const [page, setPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+
+  const handleSearch = (filters: any) => {
     console.log(filters)
   }
+
+  const normalize = (text: string) =>
+    text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+
+  const fetchProperties = async (page: number) => {
+    setIsLoading(true)
+    try {
+      const res = await fetch(`/api/properties?page=${page}&limit=6`)
+      const data: Property[] = await res.json()
+
+      // Filtrar somente coberturas
+      const penthouses = data.filter((p) =>
+        normalize(p.title).includes("cobertura")
+      )
+
+      setProperties((prev) => [...prev, ...penthouses])
+
+      if (penthouses.length < 6) {
+        setHasMore(false)
+      }
+    } catch (error) {
+      console.error("Erro ao buscar imóveis:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProperties(page)
+  }, [page])
+
+  const loadMore = () => {
+    if (!isLoading) {
+      setPage((prev) => prev + 1)
+    }
+  }
+
   return (
     <>
       <MainLayout>
-      <FilterBar onSearch={handleSearch}/>
-      <main className="container py-16">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-semibold mb-2">Coberturas</h1>
-            <p className="text-muted-foreground">Explore coberturas de alto padrão com vistas deslumbrantes</p>
+        <FilterBar onSearch={handleSearch} />
+        <main className="container py-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-semibold mb-2">Coberturas</h1>
+              <p className="text-muted-foreground">Explore coberturas de alto padrão com vistas deslumbrantes</p>
+            </div>
           </div>
-        </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {penthouses.map((property) => (
-            <PropertyCard key={property.id} {...property} />
-          ))}
-        </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {properties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                id={property.id}
+                image={(property.images?.[0]) || "/images/imoveis/imovel-3.jpg"}
+                price={property.price}
+                area={property.area}
+                suites={property.suites}
+                location={property.location}
+                parking={property.parking}
+                broker={{
+                  name: property.brokers.name,
+                  company: property.brokers.company || "N/A",
+                  avatar: property.brokers.avatar || "/default-avatar.jpg",
+                }}
+              />
+            ))}
+          </div>
 
-        <div className="mt-12 text-center">
-          <Button variant="outline" size="lg" className="px-8">
-            Carregar mais imóveis
-          </Button>
-        </div>
-      </main>
+          {hasMore && (
+            <div className="mt-12 text-center">
+              <Button
+                variant="outline"
+                size="lg"
+                className="px-8"
+                onClick={loadMore}
+                disabled={isLoading}
+              >
+                {isLoading ? "Carregando..." : "Carregar mais imóveis"}
+              </Button>
+            </div>
+          )}
+        </main>
       </MainLayout>
     </>
   )
 }
-
