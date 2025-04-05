@@ -114,7 +114,7 @@ type SectionProps = {
   description: string
   handleClick: () => void
   properties: Property[]
-  renderPropertyCard: (property: Property) => JSX.Element
+  renderPropertyCard: (property: Property) => any
 }
 
 function Section({
