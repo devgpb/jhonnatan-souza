@@ -1,299 +1,229 @@
+// pages/api/dashboard/index.ts
 
-// pages/api/brokers/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { supabase } from '@/lib/supabase'
+import { PrismaClient } from '@prisma/client'
+import { DashboardData } from '@/types/dashboard'
+// Inicializa o Prisma Client.
+// Em produção, convém instanciar apenas uma vez, usando padrão Singleton.
+const prisma = new PrismaClient()
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" })
-  }
 
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   try {
-    const { dateRange, propertyType, region, status } = req.body
-
-    // Parse date range
-    const startDate = new Date(dateRange.start)
-    const endDate = new Date(dateRange.end)
-
-    // Calculate previous period for comparison
-    const periodDuration = endDate.getTime() - startDate.getTime()
-    const previousStartDate = new Date(startDate.getTime() - periodDuration)
-    const previousEndDate = new Date(startDate)
-
-    // Preparar os filtros (ajuste conforme o seu schema, por exemplo, adicionando filtros de "type" ou "region")
-    const baseFilters = (query: any, fromDate: Date, toDate: Date) =>
-      query
-        .gte("created_at", fromDate.toISOString())
-        .lte("created_at", toDate.toISOString())
-
-    // Filtros para período atual e anterior
-    let currentQuery = supabase
-      .from("properties")
-      .select("id", { count: "exact" })
-      .eq("sold", true)
-    currentQuery = baseFilters(currentQuery, startDate, endDate)
-
-    let previousQuery = supabase
-      .from("properties")
-      .select("id", { count: "exact" })
-      .eq("sold", true)
-    previousQuery = baseFilters(previousQuery, previousStartDate, previousEndDate)
-
-    // Filtros opcionais para propertyType e region
-    if (propertyType !== "all") {
-      currentQuery = currentQuery.eq("type", propertyType)
-      previousQuery = previousQuery.eq("type", propertyType)
-    }
-    if (region !== "all") {
-      currentQuery = currentQuery.eq("region", region)
-      previousQuery = previousQuery.eq("region", region)
-    }
-    if (status !== "all") {
-      if (status === "sold") {
-        currentQuery = currentQuery.eq("sold", true)
-        previousQuery = previousQuery.eq("sold", true)
-      } else if (status === "available") {
-        currentQuery = currentQuery.eq("sold", false)
-        previousQuery = previousQuery.eq("sold", false)
-      }
-    }
-
-    // Obter contagem de vendas nos períodos
-    const { count: currentPeriodSales, error: currentCountError } = await currentQuery
-    if (currentCountError) throw currentCountError
-
-    const { count: previousPeriodSales, error: previousCountError } = await previousQuery
-    if (previousCountError) throw previousCountError
-
-    const salesTrend =
-      (previousPeriodSales ?? 0) > 0
-        ? Math.round((((currentPeriodSales ?? 0) - (previousPeriodSales ?? 0)) / (previousPeriodSales ?? 1)) * 100)
-        : 100
-
-    // Calcular receita total para os períodos (buscando os registros e somando no servidor)
-    let currentRevenueQuery = supabase
-      .from("properties")
-      .select("price")
-      .eq("sold", true)
-    currentRevenueQuery = baseFilters(currentRevenueQuery, startDate, endDate)
-    if (propertyType !== "all") currentRevenueQuery = currentRevenueQuery.eq("type", propertyType)
-    if (region !== "all") currentRevenueQuery = currentRevenueQuery.eq("region", region)
-
-    let previousRevenueQuery = supabase
-      .from("properties")
-      .select("price")
-      .eq("sold", true)
-    previousRevenueQuery = baseFilters(previousRevenueQuery, previousStartDate, previousEndDate)
-    if (propertyType !== "all") previousRevenueQuery = previousRevenueQuery.eq("type", propertyType)
-    if (region !== "all") previousRevenueQuery = previousRevenueQuery.eq("region", region)
-
-    const { data: currentRevenueData, error: currentRevenueError } = await currentRevenueQuery
-    if (currentRevenueError) throw currentRevenueError
-
-    const { data: previousRevenueData, error: previousRevenueError } = await previousRevenueQuery
-    if (previousRevenueError) throw previousRevenueError
-
-    const currentRevenueValue = currentRevenueData.reduce(
-      (sum, item) => sum + parseFloat(item.price),
-      0
+    // Exemplo de datas para cálculo de "este mês" e "mês passado"
+    // Ajuste conforme sua preferência (por ex. usando dayjs ou date-fns).
+    const now = new Date()
+    const firstDayCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const firstDayLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1
     )
-    const previousRevenueValue = previousRevenueData.reduce(
-      (sum, item) => sum + parseFloat(item.price),
-      0
+    const lastDayLastMonth = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      0,
+      23,
+      59,
+      59
     )
 
-    const revenueTrend =
-      previousRevenueValue > 0
-        ? Math.round(((currentRevenueValue - previousRevenueValue) / previousRevenueValue) * 100)
-        : 100
-
-    // Obter performance dos corretores (agrupamento feito no lado do servidor)
-    let brokerQuery = supabase
-      .from("properties")
-      .select("broker_id")
-      .eq("sold", true)
-      .not("broker_id", "is", null)
-    brokerQuery = baseFilters(brokerQuery, startDate, endDate)
-
-    const { data: brokerData, error: brokerError } = await brokerQuery
-    if (brokerError) throw brokerError
-
-    // Agrupar vendas por broker_id
-    const brokerPerformanceMap: { [key: string]: number } = {}
-    brokerData.forEach((item) => {
-      if (item.broker_id) {
-        brokerPerformanceMap[item.broker_id] = (brokerPerformanceMap[item.broker_id] || 0) + 1
-      }
+    // -- 1) Quantidade de vendas do mês atual --
+    const currentMonthSales = await prisma.properties.count({
+      where: {
+        sold: true,
+        sell_date: {
+          gte: firstDayCurrentMonth, // a partir do início do mês atual
+          lte: now,
+        },
+      },
     })
 
-    const brokerIds = Object.keys(brokerPerformanceMap)
-    let brokers: { id: string; name: string; creci: string }[] = []
-    if (brokerIds.length > 0) {
-      const { data: brokersData, error: brokersError } = await supabase
-        .from("brokers")
-        .select("id, name, creci")
-        .in("id", brokerIds)
-      if (brokersError) throw brokersError
-      brokers = brokersData
-    }
-
-    const brokerMap: { [key: string]: string } = {}
-    brokers.forEach((broker) => {
-      brokerMap[broker.id] = broker.name
+    // -- 2) Quantidade de vendas do mês anterior --
+    const lastMonthSales = await prisma.properties.count({
+      where: {
+        sold: true,
+        sell_date: {
+          gte: firstDayLastMonth,
+          lte: lastDayLastMonth,
+        },
+      },
     })
 
-    const formattedBrokerPerformance = {
-      brokers: Object.keys(brokerPerformanceMap).map(
-        (brokerId) => brokerMap[brokerId] || `Corretor ${brokerId}`
-      ),
-      sales: Object.keys(brokerPerformanceMap).map(
-        (brokerId) => brokerPerformanceMap[brokerId]
-      ),
-    }
+    // Exemplo simples de variação em relação ao mês anterior
+    const monthlySalesPercentageChange =
+      lastMonthSales === 0
+        ? 100 // se o mês anterior era zero, e agora tem vendas
+        : ((currentMonthSales - lastMonthSales) / lastMonthSales) * 100
 
-    // Gerar dados mock para trend de vendas e receita (últimos 7 dias)
-    const today = new Date()
-    const labels = []
-    const salesData = []
-    const revenueDataArray = []
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today)
-      date.setDate(date.getDate() - i)
-      labels.push(
-        date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
-      )
-      const dailySales = Math.floor(Math.random() * 10) + 1
-      salesData.push(dailySales)
-      const dailyRevenue = Math.floor(Math.random() * 400) + 100
-      revenueDataArray.push(dailyRevenue)
-    }
+    // -- 3) Total de vendas em valor (receita total) --
+    // Exemplo: soma de todos os preços das propriedades vendidas, independente de data
+    const totalRevenueAllTime = await prisma.properties.aggregate({
+      where: {
+        sold: true,
+      },
+      _sum: {
+        price: true,
+      },
+    })
 
-    // Dados mock para comparação de períodos e dados de localização
-    const periodComparisonData = {
-      categories: ["Apartamentos", "Casas", "Comercial", "Terrenos"],
-      currentPeriodLabel: "Período Atual",
-      previousPeriodLabel: "Período Anterior",
-      currentPeriod: [450000, 680000, 320000, 210000],
-      previousPeriod: [380000, 720000, 290000, 180000],
-    }
+    const totalRevenueValue = totalRevenueAllTime._sum.price ?? 0
 
-    const locationPoints = []
-    for (let i = 0; i < 15; i++) {
-      locationPoints.push({
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        value: Math.floor(Math.random() * 20) + 5,
-        sold: Math.random() > 0.5,
-      })
-    }
+    // Para pegar a receita deste mês (para comparar com a do mês passado):
+    const currentMonthRevenue = await prisma.properties.aggregate({
+      where: {
+        sold: true,
+        sell_date: {
+          gte: firstDayCurrentMonth,
+          lte: now,
+        },
+      },
+      _sum: {
+        price: true,
+      },
+    })
 
-    // Obter transações recentes
-    const { data: recentTransactionsData, error: recentTransactionsError } = await supabase
-      .from("properties")
-      .select(`
-        id,
-        title,
-        location,
-        images,
-        price,
-        updated_at,
-        sold,
-        brokers (
-          name,
-          creci
-        )
-      `)
-      .eq("sold", true)
-      .order("updated_at", { ascending: false })
-      .limit(5)
-    if (recentTransactionsError) throw recentTransactionsError
+    const currentMonthRevenueValue = currentMonthRevenue._sum.price ?? 0
 
-    const formattedTransactions = recentTransactionsData.map((property) => ({
-      id: property.id,
-      propertyTitle: property.title,
-      propertyLocation: property.location,
-      propertyImage:
-        property.images && property.images.length > 0 ? property.images[0] : null,
-      brokerName: Array.isArray(property.brokers) && property.brokers.length > 0 ? property.brokers[0].name : "N/A",
-      brokerCreci: Array.isArray(property.brokers) && property.brokers.length > 0 ? property.brokers[0].creci : "N/A",
-      value: parseFloat(property.price),
-      date: property.updated_at,
-      status: property.sold ? "sold" : "available",
+    const lastMonthRevenue = await prisma.properties.aggregate({
+      where: {
+        sold: true,
+        sell_date: {
+          gte: firstDayLastMonth,
+          lte: lastDayLastMonth,
+        },
+      },
+      _sum: {
+        price: true,
+      },
+    })
+
+    const lastMonthRevenueValue = lastMonthRevenue._sum.price ?? 0
+
+    const totalRevenuePercentageChange =
+      lastMonthRevenueValue === 0
+        ? 100
+        : ((Number(currentMonthRevenueValue) - Number(lastMonthRevenueValue)) /
+            Number(lastMonthRevenueValue)) *
+          100
+
+    // -- 4) Taxa de conversão (exemplo) --
+    // Supomos conversão como: (propriedades vendidas / total de propriedades) * 100
+    // É só um exemplo, adapte de acordo com sua lógica real de negócio.
+    const totalPropertiesCount = await prisma.properties.count()
+    const totalPropertiesSoldCount = await prisma.properties.count({
+      where: {
+        sold: true,
+      },
+    })
+    const conversionRatePercentage =
+      totalPropertiesCount === 0
+        ? 0
+        : (totalPropertiesSoldCount / totalPropertiesCount) * 100
+
+    // Para variar em relação ao mês anterior, podemos fazer algo parecido.
+    // Aqui vamos apenas manter um valor fictício.
+    const conversionRatePercentageChange = 5 // Exemplo fixo
+
+    // -- 5) Tempo médio de mercado (averageMarketTime) --
+    // Exemplo: diferença entre created_at e sell_date para as propriedades vendidas.
+    // Lembrando que sell_date é DateTime?. Se não existir, significa não vendida.
+    // Precisamos pegar a média em dias.
+    const soldProperties = await prisma.properties.findMany({
+      where: {
+        sold: true,
+        sell_date: {
+          not: null,
+        },
+      },
+      select: {
+        created_at: true,
+        sell_date: true,
+      },
+    })
+
+    let totalDaysDiff = 0
+    soldProperties.forEach((prop) => {
+      const createdAt = prop.created_at ?? new Date()
+      const soldAt = prop.sell_date ?? new Date()
+      const diffInMs = soldAt.getTime() - createdAt.getTime()
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24)
+      totalDaysDiff += diffInDays
+    })
+
+    const averageMarketTimeDays =
+      soldProperties.length === 0
+        ? 0
+        : parseFloat((totalDaysDiff / soldProperties.length).toFixed(2))
+
+    // -- 6) Preço médio (todas as propriedades) --
+    const averagePriceAllProps = await prisma.properties.aggregate({
+      _avg: {
+        price: true,
+      },
+    })
+    const averagePrice = averagePriceAllProps._avg.price ?? 0
+
+    // -- 7) Total de propriedades vendidas (todas) --
+    const propertiesSold = totalPropertiesSoldCount
+
+    // -- 8) Transações recentes (exemplo) --
+    // Vamos pegar as 5 mais recentes propriedades vendidas, ordenando por sell_date desc
+    // e montar um array de Transaction
+    const recentSoldProperties = await prisma.properties.findMany({
+      where: {
+        sold: true,
+      },
+      orderBy: {
+        sell_date: 'desc',
+      },
+      take: 5,
+      include: {
+        brokers: true,
+      },
+    })
+
+    const recentTransactions = recentSoldProperties.map((prop) => ({
+      property: prop.title,
+      agent: prop.brokers?.name ?? 'Sem corretor',
+      value: Number(prop.price),
+      date: prop.sell_date?.toISOString() ?? '',
+      status: prop.status,
     }))
 
-    // Dados de resumo
-    const { count: totalProperties, error: totalPropertiesError } = await supabase
-      .from("properties")
-      .select("id", { count: "exact", head: true })
-    if (totalPropertiesError) throw totalPropertiesError
-
-    const { count: soldProperties, error: soldPropertiesError } = await supabase
-      .from("properties")
-      .select("id", { count: "exact", head: true })
-      .eq("sold", true)
-    if (soldPropertiesError) throw soldPropertiesError
-
-    // Cálculo da média de preço (buscando todos os registros – cuidado com performance em tabelas grandes)
-    const { data: allPropertiesData, error: allPropertiesError } = await supabase
-      .from("properties")
-      .select("price")
-    if (allPropertiesError) throw allPropertiesError
-
-    const totalPrice = allPropertiesData.reduce(
-      (sum, item) => sum + parseFloat(item.price),
-      0
-    )
-    const avgPrice =
-      allPropertiesData.length > 0 ? totalPrice / allPropertiesData.length : 0
-
-    // Dados mock para tempo médio no mercado e taxa de conversão (essas métricas podem vir de outros acompanhamentos)
-    const avgTimeOnMarket = 45
-    const conversionRate = {
-      value: 24,
-      trend: 3,
-    }
-
-    const dashboardData = {
-      kpis: {
+    // Monta objeto final
+    const dashboardData: DashboardData = {
+      kpis:{
         monthlySales: {
-          count: currentPeriodSales,
-          trend: salesTrend,
+          value: currentMonthSales,
+          percentageChange: parseFloat(monthlySalesPercentageChange.toFixed(2)),
         },
         totalRevenue: {
-          value: currentRevenueValue,
-          trend: revenueTrend,
+          value: parseFloat(totalRevenueValue.toFixed(2)),
+          percentageChange: parseFloat(totalRevenuePercentageChange.toFixed(2)),
         },
-        conversionRate,
-      },
-      salesTrend: {
-        labels,
-        sales: salesData,
-        revenue: revenueDataArray,
-      },
-      periodComparison: periodComparisonData,
-      brokerPerformance: formattedBrokerPerformance,
-      locationData: {
-        points: locationPoints,
+        conversionRate: {
+          percentage: parseFloat(conversionRatePercentage.toFixed(2)),
+          percentageChange: parseFloat(conversionRatePercentageChange.toFixed(2)),
+        },
       },
       summary: {
-        totalProperties,
-        avgTimeOnMarket,
-        avgPrice,
-        soldProperties,
+        totalProperties: totalPropertiesCount,
+        averageMarketTime: {
+          days: averageMarketTimeDays,
+        },
+        averagePrice: parseFloat(averagePrice.toFixed(2)),
+        soldProperties: propertiesSold,
       },
-      recentTransactions: {
-        transactions: formattedTransactions,
-      },
+      recentTransactions,
     }
 
-    res.status(200).json(dashboardData)
+    return res.status(200).json(dashboardData)
   } catch (error) {
-    console.error("Dashboard API error:", error)
-    res
-      .status(500)
-      .json({ 
-        message: "Error fetching dashboard data", 
-        error: error instanceof Error ? error.message : "Unknown error" 
-      })
+    console.error('Erro ao obter dados do dashboard:', error)
+    return res.status(500).json({ error: 'Erro interno do servidor' })
   }
 }

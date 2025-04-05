@@ -1,14 +1,8 @@
 import { Home, Clock, Tag, CheckCircle, DollarSign, Building } from "lucide-react"
-
-interface SummaryData {
-  totalProperties: number
-  avgTimeOnMarket: number
-  avgPrice: number
-  soldProperties: number
-}
+import { DashboardSummary } from "@/types/dashboard"
 
 interface SummaryCardsProps {
-  data: SummaryData
+  data: DashboardSummary
 }
 
 export default function SummaryCards({ data }: SummaryCardsProps) {
@@ -40,7 +34,7 @@ export default function SummaryCards({ data }: SummaryCardsProps) {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Tempo Médio no Mercado</p>
-            <p className="text-2xl font-bold mt-1">{data.avgTimeOnMarket} dias</p>
+            <p className="text-2xl font-bold mt-1">{data.averageMarketTime.days} dias</p>
           </div>
         </div>
       </div>
@@ -52,7 +46,7 @@ export default function SummaryCards({ data }: SummaryCardsProps) {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Preço Médio</p>
-            <p className="text-2xl font-bold mt-1">{formatCurrency(data.avgPrice)}</p>
+            <p className="text-2xl font-bold mt-1">{formatCurrency(data.averagePrice)}</p>
           </div>
         </div>
       </div>

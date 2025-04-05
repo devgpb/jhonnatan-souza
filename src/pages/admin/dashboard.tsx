@@ -3,13 +3,10 @@ import Head from 'next/head';
 import SidebarLayout from "@/layouts/SideBarLayout";
 
 import KpiCards from '@/components/admin/dashboard/kpi-cards';
-import SalesChart from '@/components/admin/dashboard/sales-chart';
-import BrokerPerformance from '@/components/admin/dashboard/broker-performance';
-import PropertyMap from '@/components/admin/dashboard/property-map';
 import RecentTransactions from '@/components/admin/dashboard/recent-transactions';
 import FilterBar from '@/components/admin/dashboard/filter-bar';
 import SummaryCards from '@/components/admin/dashboard/summary-cards';
-import PeriodComparison from '@/components/admin/dashboard/period-comparison';
+import { DashboardData } from '@/types/dashboard';
 
 // Define types for filter state
 interface DateRange {
@@ -22,67 +19,6 @@ interface FilterState {
   propertyType: string;
   region: string;
   status: string;
-}
-
-// Dashboard data interface
-interface DashboardData {
-  kpis: {
-    monthlySales: {
-      count: number;
-      trend: number;
-    };
-    totalRevenue: {
-      value: number;
-      trend: number;
-    };
-    conversionRate: {
-      value: number;
-      trend: number;
-    };
-  };
-  salesTrend: {
-    labels: string[];
-    sales: number[];
-    revenue: number[];
-  };
-  periodComparison: {
-    categories: string[];
-    currentPeriodLabel: string;
-    previousPeriodLabel: string;
-    currentPeriod: number[];
-    previousPeriod: number[];
-  };
-  brokerPerformance: {
-    brokers: string[];
-    sales: number[];
-  };
-  locationData: {
-    points: Array<{
-      x: number;
-      y: number;
-      value: number;
-      sold: boolean;
-    }>;
-  };
-  summary: {
-    totalProperties: number;
-    avgTimeOnMarket: number;
-    avgPrice: number;
-    soldProperties: number;
-  };
-  recentTransactions: {
-    transactions: Array<{
-      id: number;
-      propertyTitle: string;
-      propertyLocation: string;
-      propertyImage: string | null;
-      brokerName: string;
-      brokerCreci: string;
-      value: number;
-      date: string | Date;
-      status: string;
-    }>;
-  };
 }
 
 export default function Dashboard() {

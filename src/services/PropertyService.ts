@@ -55,4 +55,20 @@ export const propertyService = {
     }
     return true;
   },
+
+
+  async markAsSold(id: string) {
+    const response = await fetch(`${API_BASE}/sold`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ propertyId: id }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Erro ao marcar propriedade como vendida");
+    }
+    return response.json();
+  }
 };

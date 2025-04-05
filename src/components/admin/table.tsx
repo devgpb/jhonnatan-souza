@@ -131,6 +131,11 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
     onDelete()
   }
 
+  const handleSold = async (property: Property) => {
+    await propertyService.markAsSold(property.id)
+    onDelete()
+  }
+
   const sortedProperties = [...filteredProperties].sort((a, b) => {
     const aValue = a[sortColumn]
     const bValue = b[sortColumn]
@@ -216,17 +221,25 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
                   <td className="px-4 py-3 text-muted-foreground">{property.location}</td>
                   <td className="px-4 py-3">{property.price ? formatCurrency(property.price) : "Sob Consulta"}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={property.sold ? "destructive" : "default"}>
+                    <Badge variant={property.sold ? "success" : "default"}>
                       {property.sold ? "Vendido" : "Disponível"}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{property.brokers?.name || "Não atribuído"}</td>
                   <td className="px-4 py-3">
+                  
+                  {property.sold ? (
+                    <ActionButton onClick={() => handleSold(property)} type="unsold" />
+                  ) : 
+                  (<ActionButton onClick={() => handleSold(property)} type="sold" />
+                  )}
+
                   <ActionButton 
                     onClick={() => onEdit(property)} 
                     type="update" 
                   />
-                    <ActionButton onClick={() => handleDelete(property)} type="delete" />
+                  <ActionButton onClick={() => handleDelete(property)} type="delete" />
+
                   </td>
                 </tr>
               ))}

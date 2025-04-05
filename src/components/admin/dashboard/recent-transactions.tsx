@@ -1,25 +1,11 @@
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge'; // Replace with the correct path to the Badge component
+import { Transaction } from '@/types/dashboard';
 
-interface Transaction {
-  id: number;
-  propertyTitle: string;
-  propertyLocation: string;
-  propertyImage: string | null;
-  brokerName: string;
-  brokerCreci: string;
-  value: number;
-  date: string | Date;
-  status: string;
-}
-
-interface RecentTransactionsData {
-  transactions: Transaction[];
-}
 
 interface RecentTransactionsProps {
-  data: RecentTransactionsData;
+  data: Transaction[];
 }
 
 export default function RecentTransactions({ data }: RecentTransactionsProps) {
@@ -77,11 +63,11 @@ export default function RecentTransactions({ data }: RecentTransactionsProps) {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.transactions.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-gray-50">
+          {data.map((transaction) => (
+            <tr key={transaction.property} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 h-10 w-10 relative">
+                  {/* <div className="flex-shrink-0 h-10 w-10 relative">
                     {transaction.propertyImage ? (
                       <img
                         src={transaction.propertyImage || "/placeholder.svg"}
@@ -93,16 +79,16 @@ export default function RecentTransactions({ data }: RecentTransactionsProps) {
                         <span className="text-gray-500 text-xs">Sem foto</span>
                       </div>
                     )}
-                  </div>
+                  </div> */}
                   <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">{transaction.propertyTitle}</div>
-                    <div className="text-sm text-gray-500">{transaction.propertyLocation}</div>
+                    <div className="text-sm font-medium text-gray-900">{transaction.property}</div>
+                    {/* <div className="text-sm text-gray-500">{transaction.propertyLocation}</div> */}
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">{transaction.brokerName}</div>
-                <div className="text-sm text-gray-500">CRECI: {transaction.brokerCreci}</div>
+                <div className="text-sm text-gray-900">{transaction.agent}</div>
+                {/* <div className="text-sm text-gray-500">CRECI: {transaction.brokerCreci}</div> */}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">{formatCurrency(transaction.value)}</div>

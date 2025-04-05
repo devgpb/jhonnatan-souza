@@ -7,7 +7,7 @@ export function Footer() {
   return (
     <footer className="bg-primario text-white">
       <div className="container">
-        <div className="grid grid-cols-12 gap-8 py-20">
+        <div className="grid grid-cols-12 gap-8 py-20" style={{ borderBottom: '2px solid #fabc3f' }}>
           {/* Logo and Description */}
           <div className="col-span-12 lg:col-span-4 space-y-6">
             <div className=" h-[200px]">
