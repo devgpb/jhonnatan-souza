@@ -178,11 +178,11 @@ export async function getServerSideProps(
   const url = `${protocol}://${host}/api/properties`
 
   const res = await fetch(url)
-  const data: ApiResponse[] = await res.json()
+  const json = await res.json()
 
   return {
     props: {
-      allProperties: data,
+      allProperties: json.data ?? [],
     },
   }
 }

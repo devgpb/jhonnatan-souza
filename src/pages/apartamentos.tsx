@@ -40,16 +40,18 @@ export default function ApartmentsPage() {
     setIsLoading(true)
     try {
       const res = await fetch(`/api/properties?page=${page}&limit=6`)
-      const data: Property[] = await res.json()
-
-      // Filtro só apartamentos
-      const apartments = data.filter((p) =>
+      const json = await res.json()
+  
+      // Acesse o array real
+      const fetchedProps: Property[] = Array.isArray(json.data) ? json.data : []
+  
+      // Filtra só apartamentos
+      const apartments = fetchedProps.filter((p) =>
         normalize(p.title).includes("apartamento")
       )
-
-      // Atualiza o estado
+  
       setProperties((prev) => [...prev, ...apartments])
-
+  
       // Se vier menos do que o limit, não tem mais
       if (apartments.length < 6) {
         setHasMore(false)

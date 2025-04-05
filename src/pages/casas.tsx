@@ -40,15 +40,19 @@ export default function HousesPage() {
     setIsLoading(true)
     try {
       const res = await fetch(`/api/properties?page=${page}&limit=6`)
-      const data: Property[] = await res.json()
-
-      // Filtrar somente casas
-      const houses = data.filter((p) =>
+      const json = await res.json()
+  
+      // Acesse o array real
+      const fetchedProps: Property[] = Array.isArray(json.data) ? json.data : []
+  
+      // Filtra só apartamentos
+      const houses = fetchedProps.filter((p) =>
         normalize(p.title).includes("casa")
       )
-
+  
       setProperties((prev) => [...prev, ...houses])
-
+  
+      // Se vier menos do que o limit, não tem mais
       if (houses.length < 6) {
         setHasMore(false)
       }
