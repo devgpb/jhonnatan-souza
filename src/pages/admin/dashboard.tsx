@@ -168,7 +168,7 @@ export default function Dashboard() {
                 <KpiCards data={dashboardData.kpis} />
               </div>
   
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div className="bg-white p-4 rounded-lg shadow">
                   <h2 className="text-lg font-semibold mb-4">Tendência de Vendas</h2>
                   <SalesChart data={dashboardData.salesTrend} />
@@ -178,7 +178,6 @@ export default function Dashboard() {
                   <PeriodComparison data={dashboardData.periodComparison} />
                 </div>
               </div>
-
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div className="bg-white p-4 rounded-lg shadow">
                   <h2 className="text-lg font-semibold mb-4">Desempenho por Corretor</h2>
@@ -188,7 +187,7 @@ export default function Dashboard() {
                   <h2 className="text-lg font-semibold mb-4">Distribuição Geográfica</h2>
                   <PropertyMap data={dashboardData.locationData} />
                 </div>
-              </div>
+              </div> */}
 
               <div className="mb-6">
                 <SummaryCards data={dashboardData.summary} />
