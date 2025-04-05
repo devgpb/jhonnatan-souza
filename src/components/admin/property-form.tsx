@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, type ChangeEvent, type FormEvent } fr
 import { useDropzone } from "react-dropzone"
 import { motion, AnimatePresence } from "framer-motion"
 import * as Progress from "@radix-ui/react-progress"
-import * as Select from "@radix-ui/react-select"
 import {
   AlertCircle,
   Check,
@@ -34,6 +33,7 @@ import { brokerService } from "@/services/BrokerService"
 import { propertyService } from "@/services/PropertyService"
 import { supabase } from "@/lib/supabase"
 import { IMaskInput } from "react-imask"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 
 // -----------------------------------------------------------
 // Tipos para a lista de corretores e valores do form
@@ -58,6 +58,7 @@ interface PropertyValues {
   parking: string
   description: string
   broker_id: string
+  type: string
 }
 
 interface FormStatus {
@@ -81,18 +82,13 @@ function BrokerSelect({ brokers, value, onValueChange }: BrokerSelectProps) {
   )
 
   return (
-    <Select.Root value={value} onValueChange={onValueChange}>
-      <Select.Trigger className="w-full inline-flex items-center justify-between rounded-md border border-input bg-background px-3 h-10">
-        <Select.Value placeholder="Selecione um corretor">
-          {value ? brokers.find((b) => String(b.id) === value)?.name : "Selecione um corretor"}
-        </Select.Value>
-        <Select.Icon>
-          <ChevronDown className="h-4 w-4 opacity-50" />
-        </Select.Icon>
-      </Select.Trigger>
-
-      <Select.Portal>
-        <Select.Content className="w-[--radix-select-trigger-width] bg-white rounded-md border shadow-lg">
+    <div className="space-y-2">
+      <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Selecione um corretor" />
+        </SelectTrigger>
+        <SelectContent>
+          {/* Campo de busca */}
           <div className="p-2">
             <Input
               placeholder="Pesquisar corretor..."
@@ -102,31 +98,22 @@ function BrokerSelect({ brokers, value, onValueChange }: BrokerSelectProps) {
               className="w-full"
             />
           </div>
-          <Select.Viewport className="p-1 max-h-60">
-            <Select.Group>
-              {filteredBrokers.length > 0 ? (
-                filteredBrokers.map((broker) => (
-                  <Select.Item
-                    key={broker.id}
-                    value={String(broker.id)}
-                    className="relative flex items-center px-8 py-2 rounded-sm text-sm cursor-default hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground outline-none"
-                  >
-                    <Select.ItemText>{broker.name}</Select.ItemText>
-                    <Select.ItemIndicator className="absolute left-2 inline-flex items-center">
-                      <Check className="h-4 w-4" />
-                    </Select.ItemIndicator>
-                  </Select.Item>
-                ))
-              ) : (
-                <div className="px-2 py-4 text-sm text-center text-muted-foreground">
-                  Nenhum corretor encontrado
-                </div>
-              )}
-            </Select.Group>
-          </Select.Viewport>
-        </Select.Content>
-      </Select.Portal>
-    </Select.Root>
+
+          {/* Lista de opções */}
+          {filteredBrokers.length > 0 ? (
+            filteredBrokers.map((broker) => (
+              <SelectItem key={broker.id} value={String(broker.id)}>
+                {broker.name}
+              </SelectItem>
+            ))
+          ) : (
+            <div className="px-2 py-4 text-sm text-center text-muted-foreground">
+              Nenhum corretor encontrado
+            </div>
+          )}
+        </SelectContent>
+      </Select>
+    </div>
   )
 }
 
@@ -148,6 +135,7 @@ const initialValues: PropertyValues = {
   parking: "",
   description: "",
   broker_id: "",
+  type: "",
 }
 
 interface PropertyFormProps {
@@ -162,7 +150,9 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   const [formValues, setFormValues] = useState<PropertyValues>(initialValues)
   const [brokers, setBrokers] = useState<Broker[]>([])
   const [images, setImages] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [status, setStatus] = useState<FormStatus>({ type: null, message: "" })
@@ -181,14 +171,44 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   }, [])
 
   useEffect(() => {
-    if (propertyToEdit) {
-      setFormValues({
-        ...initialValues,  // ou faz merges, depende do seu state
-        ...propertyToEdit,
-      })
-      // se tiver images etc., você também preenche
-    }
-  }, [propertyToEdit])
+    const fetchProperty = async () => {
+      if (!propertyToEdit?.id) return;
+  
+      try {
+        const property = await propertyService.getPropertyById(propertyToEdit.id);
+  
+        setFormValues({
+          ...initialValues,
+          ...property,
+          broker_id: property.broker_id ? property.broker_id : "",
+          price: property.price?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+          area: property.area?.toString() || "",
+          iptu: property.iptu?.toString() || "",
+          year: property.year?.toString() || "",
+          bedrooms: property.bedrooms?.toString() || "",
+          bathrooms: property.bathrooms?.toString() || "",
+          parking: property.parking?.toString() || "",
+          suites: property.suites?.toString() || "",
+        });
+  
+        // Aqui faz a separação das imagens já existentes
+        setExistingImages(property.images || []);
+        setImagePreviews(property.images || []);
+  
+        // Se tiver diferenciais
+        setTags(property.amenities ? property.amenities.split(",") : []);
+      } catch (error) {
+        console.error("Erro ao buscar imóvel:", error);
+        setStatus({
+          type: "error",
+          message: "Erro ao carregar dados do imóvel.",
+        });
+      }
+    };
+  
+    fetchProperty();
+  }, [propertyToEdit]);
+  
 
   const fetchBrokers = async () => {
     try {
@@ -207,11 +227,11 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   // 2. Upload de imagens (React Dropzone)
   // -----------------------------------------------------------
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setImages((prev) => [...prev, ...acceptedFiles])
-    const newPreviews = acceptedFiles.map((file) => URL.createObjectURL(file))
-    setImagePreviews((prev) => [...prev, ...newPreviews])
-  }, [])
-
+    setNewImages((prev) => [...prev, ...acceptedFiles]);
+    const newPreviews = acceptedFiles.map((file) => URL.createObjectURL(file));
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+  }, []);
+  
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { "image/*": [".jpeg", ".jpg", ".png", ".gif"] },
@@ -238,9 +258,17 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   }
 
   const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index))
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
-  }
+    const previewToRemove = imagePreviews[index];
+  
+    if (existingImages.includes(previewToRemove)) {
+      setExistingImages((prev) => prev.filter((url) => url !== previewToRemove));
+    } else {
+      setNewImages((prev) => prev.filter((_, i) => i !== index - existingImages.length));
+    }
+  
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+  
 
   // -----------------------------------------------------------
   // 4. Tags / Diferenciais
@@ -318,7 +346,8 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
 
     try {
       // Envia todas as imagens para o Storage
-      const imageUrls = await Promise.all(images.map((file) => uploadPropertyImage(file)))
+      const newImageUrls = await Promise.all(newImages.map((file) => uploadPropertyImage(file)));
+      const imageUrls = [...existingImages, ...newImageUrls];
 
       // Prepara o objeto a ser enviado pro seu propertyService
       const propertyData = {
@@ -477,6 +506,23 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
               {touched.location && !formValues.location && (
                 <p className="text-sm text-red-500">Bairro é obrigatório</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="type">Tipo do Imóvel</Label>
+              <Select
+                value={formValues.type}
+                onValueChange={(value) => setFormValues((prev) => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="casa">Casa</SelectItem>
+                  <SelectItem value="apartamento">Apartamento</SelectItem>
+                  <SelectItem value="cobertura">Cobertura</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Preço */}
@@ -808,14 +854,16 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
 
         {/* Botão de Envio */}
         <Button type="submit" disabled={uploading} className="w-full h-12 text-base font-medium">
-          {uploading ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            "Cadastrar Imóvel"
-          )}
+        {uploading ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Enviando...
+          </>
+        ) : propertyToEdit?.id ? (
+          "Editar Imóvel"
+        ) : (
+          "Cadastrar Imóvel"
+        )}
         </Button>
       </form>
     </div>

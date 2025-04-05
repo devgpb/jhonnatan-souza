@@ -27,30 +27,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     case 'PUT': {
-      // Atualizar propriedade
-      // Exemplo: { address, price, broker_id }
-      const { address, price, broker_id } = req.body
-      const fieldsToUpdate: Record<string, unknown> = {}
-      if (address) fieldsToUpdate.address = address
-      if (price) fieldsToUpdate.price = price
-      if (broker_id !== undefined) fieldsToUpdate.broker_id = broker_id
-
-      if (Object.keys(fieldsToUpdate).length === 0) {
+      const propertyData = req.body
+    
+      if (!propertyData || Object.keys(propertyData).length === 0) {
         return res.status(400).json({ error: 'Nada para atualizar.' })
       }
-
+    
       const { data, error } = await supabase
         .from('properties')
-        .update(fieldsToUpdate)
+        .update(propertyData)
         .eq('id', id)
         .single()
-
+    
       if (error) {
         return res.status(400).json({ error: error.message })
       }
-
+    
       return res.status(200).json(data)
     }
+    
 
     case 'DELETE': {
       // Excluir propriedade

@@ -15,13 +15,19 @@ export const propertyService = {
     return response.json();
   },
 
-  async getProperties() {
-    const response = await fetch(`${API_BASE}`);
+  async getProperties(filters = {}) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const url = queryParams ? `${API_BASE}?${queryParams}` : `${API_BASE}`;
+  
+    const response = await fetch(url);
+  
     if (!response.ok) {
       throw new Error("Erro ao buscar propriedades");
     }
+  
     return response.json();
   },
+  
 
   async getPropertyById(id: string) {
     const response = await fetch(`${API_BASE}/${id}`);

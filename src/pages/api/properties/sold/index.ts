@@ -35,6 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .update({
         sold: !isCurrentlySold,
         sell_date: isCurrentlySold ? null : new Date(),
+        status: isCurrentlySold ? 'disponível' : 'vendido',
       })
       .eq('id', propertyId)
 

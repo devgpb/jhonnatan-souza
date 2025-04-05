@@ -56,11 +56,11 @@ export function SideColumn() {
           <h3 className="text-sm font-medium text-gray-600 mb-2">Filtros Rápidos</h3>
           <div className="space-y-1">
             <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-white/60 rounded-md"
-              onClick={() => handleImoveis("/admin/listagem")}>
+              onClick={() => handleImoveis("/admin/listagem?status=disponível")}>
               Disponíveis
             </button>
             <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-white/60 rounded-md"
-             onClick={() => handleImoveis("/admin/listagem")}>
+             onClick={() => handleImoveis("/admin/listagem?status=vendido")}>
               Vendidos
             </button>
             <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-white/60 rounded-md"
@@ -75,15 +75,15 @@ export function SideColumn() {
           <h3 className="text-sm font-medium text-gray-600 mb-2">Tipo de Imóvel</h3>
           <div className="space-y-1">
             <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-white/60 rounded-md"
-             onClick={() => handleImoveis("/admin/listagem")}>
+             onClick={() => handleImoveis("/admin/listagem?type=apartamento")}>
               Apartamentos
             </button>
             <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-white/60 rounded-md"
-             onClick={() => handleImoveis("/admin/listagem")}>
+             onClick={() => handleImoveis("/admin/listagem?type=casa")}>
               Casas
             </button>
             <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-white/60 rounded-md"
-             onClick={() => handleImoveis("/admin/listagem")}>
+             onClick={() => handleImoveis("/admin/listagem?type=cobertura")}>
               Coberturas
             </button>
           </div>
