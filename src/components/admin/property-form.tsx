@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useCallback, type ChangeEvent, type FormEvent } from "react"
 import { useDropzone } from "react-dropzone"
 import { motion, AnimatePresence } from "framer-motion"
@@ -7,7 +9,6 @@ import * as Progress from "@radix-ui/react-progress"
 import {
   AlertCircle,
   Check,
-  ChevronDown,
   ImageIcon,
   Loader2,
   Upload,
@@ -32,7 +33,6 @@ import { cn } from "@/lib/utils"
 import { brokerService } from "@/services/BrokerService"
 import { propertyService } from "@/services/PropertyService"
 import { supabase } from "@/lib/supabase"
-import { IMaskInput } from "react-imask"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 
 // -----------------------------------------------------------
@@ -43,6 +43,7 @@ interface Broker {
   name: string
 }
 
+// Adicionar a propriedade 'exclusive' à interface PropertyValues
 interface PropertyValues {
   id: string
   title: string
@@ -59,6 +60,7 @@ interface PropertyValues {
   description: string
   broker_id: string
   type: string
+  exclusive: boolean
 }
 
 interface FormStatus {
@@ -77,9 +79,7 @@ interface BrokerSelectProps {
 
 function BrokerSelect({ brokers, value, onValueChange }: BrokerSelectProps) {
   const [search, setSearch] = useState("")
-  const filteredBrokers = brokers.filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase()),
-  )
+  const filteredBrokers = brokers.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div className="space-y-2">
@@ -107,9 +107,7 @@ function BrokerSelect({ brokers, value, onValueChange }: BrokerSelectProps) {
               </SelectItem>
             ))
           ) : (
-            <div className="px-2 py-4 text-sm text-center text-muted-foreground">
-              Nenhum corretor encontrado
-            </div>
+            <div className="px-2 py-4 text-sm text-center text-muted-foreground">Nenhum corretor encontrado</div>
           )}
         </SelectContent>
       </Select>
@@ -120,6 +118,7 @@ function BrokerSelect({ brokers, value, onValueChange }: BrokerSelectProps) {
 // -----------------------------------------------------------
 // Valores iniciais do formulário de Imóvel
 // -----------------------------------------------------------
+// Adicionar o valor padrão 'exclusive: false' ao objeto initialValues
 const initialValues: PropertyValues = {
   id: "",
   title: "",
@@ -136,6 +135,7 @@ const initialValues: PropertyValues = {
   description: "",
   broker_id: "",
   type: "",
+  exclusive: false,
 }
 
 interface PropertyFormProps {
@@ -150,9 +150,9 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   const [formValues, setFormValues] = useState<PropertyValues>(initialValues)
   const [brokers, setBrokers] = useState<Broker[]>([])
   const [images, setImages] = useState<File[]>([])
-  const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [newImages, setNewImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([])
+  const [newImages, setNewImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [status, setStatus] = useState<FormStatus>({ type: null, message: "" })
@@ -160,23 +160,23 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState("")
   const [locations, setLocations] = useState<string[]>([])
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState("")
 
   // -----------------------------------------------------------
   // 1. Buscar corretores via rota /api/brokers
   // -----------------------------------------------------------
   useEffect(() => {
-    fetchBrokers();
-    fetchLocations();
+    fetchBrokers()
+    fetchLocations()
   }, [])
 
   useEffect(() => {
     const fetchProperty = async () => {
-      if (!propertyToEdit?.id) return;
-  
+      if (!propertyToEdit?.id) return
+
       try {
-        const property = await propertyService.getPropertyById(propertyToEdit.id);
-  
+        const property = await propertyService.getPropertyById(propertyToEdit.id)
+
         setFormValues({
           ...initialValues,
           ...property,
@@ -189,26 +189,25 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
           bathrooms: property.bathrooms?.toString() || "",
           parking: property.parking?.toString() || "",
           suites: property.suites?.toString() || "",
-        });
-  
+        })
+
         // Aqui faz a separação das imagens já existentes
-        setExistingImages(property.images || []);
-        setImagePreviews(property.images || []);
-  
+        setExistingImages(property.images || [])
+        setImagePreviews(property.images || [])
+
         // Se tiver diferenciais
-        setTags(property.amenities ? property.amenities.split(",") : []);
+        setTags(property.amenities ? property.amenities.split(",") : [])
       } catch (error) {
-        console.error("Erro ao buscar imóvel:", error);
+        console.error("Erro ao buscar imóvel:", error)
         setStatus({
           type: "error",
           message: "Erro ao carregar dados do imóvel.",
-        });
+        })
       }
-    };
-  
-    fetchProperty();
-  }, [propertyToEdit]);
-  
+    }
+
+    fetchProperty()
+  }, [propertyToEdit])
 
   const fetchBrokers = async () => {
     try {
@@ -227,11 +226,11 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   // 2. Upload de imagens (React Dropzone)
   // -----------------------------------------------------------
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setNewImages((prev) => [...prev, ...acceptedFiles]);
-    const newPreviews = acceptedFiles.map((file) => URL.createObjectURL(file));
-    setImagePreviews((prev) => [...prev, ...newPreviews]);
-  }, []);
-  
+    setNewImages((prev) => [...prev, ...acceptedFiles])
+    const newPreviews = acceptedFiles.map((file) => URL.createObjectURL(file))
+    setImagePreviews((prev) => [...prev, ...newPreviews])
+  }, [])
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { "image/*": [".jpeg", ".jpg", ".png", ".gif"] },
@@ -241,15 +240,11 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   // -----------------------------------------------------------
   // 3. Handlers do formulário
   // -----------------------------------------------------------
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
     setFormValues((prev) => ({
       ...prev,
-      [name]: type === "checkbox"
-        ? (e.target as HTMLInputElement).checked
-        : value,
+      [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }))
   }
 
@@ -258,17 +253,16 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
   }
 
   const removeImage = (index: number) => {
-    const previewToRemove = imagePreviews[index];
-  
+    const previewToRemove = imagePreviews[index]
+
     if (existingImages.includes(previewToRemove)) {
-      setExistingImages((prev) => prev.filter((url) => url !== previewToRemove));
+      setExistingImages((prev) => prev.filter((url) => url !== previewToRemove))
     } else {
-      setNewImages((prev) => prev.filter((_, i) => i !== index - existingImages.length));
+      setNewImages((prev) => prev.filter((_, i) => i !== index - existingImages.length))
     }
-  
-    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-  };
-  
+
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
+  }
 
   // -----------------------------------------------------------
   // 4. Tags / Diferenciais
@@ -331,12 +325,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
         type: "error",
         message: "Por favor, preencha todos os campos obrigatórios",
       })
-      setTouched(
-        Object.keys(formValues).reduce(
-          (acc, key) => ({ ...acc, [key]: true }),
-          {},
-        ),
-      )
+      setTouched(Object.keys(formValues).reduce((acc, key) => ({ ...acc, [key]: true }), {}))
       return
     }
 
@@ -346,8 +335,8 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
 
     try {
       // Envia todas as imagens para o Storage
-      const newImageUrls = await Promise.all(newImages.map((file) => uploadPropertyImage(file)));
-      const imageUrls = [...existingImages, ...newImageUrls];
+      const newImageUrls = await Promise.all(newImages.map((file) => uploadPropertyImage(file)))
+      const imageUrls = [...existingImages, ...newImageUrls]
 
       // Prepara o objeto a ser enviado pro seu propertyService
       const propertyData = {
@@ -356,12 +345,12 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
         images: imageUrls,
         // Convertendo strings pra número/boolean onde necessário
         price: formValues.price ? parseCurrency(formValues.price) : null,
-        area: formValues.area ? parseFloat(formValues.area) : null,
-        iptu: formValues.iptu ? parseFloat(formValues.iptu) : null,
-        year: formValues.year ? parseInt(formValues.year, 10) : null,
-        bedrooms: formValues.bedrooms ? parseInt(formValues.bedrooms, 10) : 0,
-        bathrooms: formValues.bathrooms ? parseInt(formValues.bathrooms, 10) : 0,
-        parking: formValues.parking ? parseInt(formValues.parking, 10) : 0,
+        area: formValues.area ? Number.parseFloat(formValues.area) : null,
+        iptu: formValues.iptu ? Number.parseFloat(formValues.iptu) : null,
+        year: formValues.year ? Number.parseInt(formValues.year, 10) : null,
+        bedrooms: formValues.bedrooms ? Number.parseInt(formValues.bedrooms, 10) : 0,
+        bathrooms: formValues.bathrooms ? Number.parseInt(formValues.bathrooms, 10) : 0,
+        parking: formValues.parking ? Number.parseInt(formValues.parking, 10) : 0,
         // sold já é boolean
       }
 
@@ -376,7 +365,6 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
         result = await propertyService.createProperty(propertyData)
         setStatus({ type: "success", message: "Imóvel cadastrado com sucesso!" })
       }
-
 
       setStatus({
         type: "success",
@@ -401,27 +389,27 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
 
   // Função para buscar os bairros (distinct) no Supabase
   async function fetchLocations() {
-    try{
+    try {
       const res = await fetch("/api/properties/locations")
       if (!res.ok) throw new Error(`Request failed with ${res.status}`)
       const data = await res.json()
-      setLocations(data)  // 'locations' é o state de bairros
+      setLocations(data) // 'locations' é o state de bairros
     } catch (err) {
       console.error("Erro ao buscar locations:", err)
     }
   }
 
   function formatCurrency(value: string) {
-    const onlyDigits = value.replace(/\D/g, "");
-    const number = parseFloat(onlyDigits) / 100;
-    return number.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    const onlyDigits = value.replace(/\D/g, "")
+    const number = Number.parseFloat(onlyDigits) / 100
+    return number.toLocaleString("pt-BR", { minimumFractionDigits: 2 })
   }
 
   function parseCurrency(value: string) {
-    const normalized = value.replace(/\./g, "").replace(",", ".");
-    return parseFloat(normalized);
+    const normalized = value.replace(/\./g, "").replace(",", ".")
+    return Number.parseFloat(normalized)
   }
-  
+
   // -----------------------------------------------------------
   // Renderização do componente
   // -----------------------------------------------------------
@@ -451,9 +439,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 placeholder="Ex: AVA660"
                 className={cn(touched.id && !formValues.id && "border-red-500 focus-visible:ring-red-500")}
               />
-              {touched.id && !formValues.id && (
-                <p className="text-sm text-red-500">ID é obrigatório</p>
-              )}
+              {touched.id && !formValues.id && <p className="text-sm text-red-500">ID é obrigatório</p>}
             </div>
 
             {/* Título */}
@@ -468,9 +454,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 placeholder="Apartamento de Alto Padrão"
                 className={cn(touched.title && !formValues.title && "border-red-500 focus-visible:ring-red-500")}
               />
-              {touched.title && !formValues.title && (
-                <p className="text-sm text-red-500">Título é obrigatório</p>
-              )}
+              {touched.title && !formValues.title && <p className="text-sm text-red-500">Título é obrigatório</p>}
             </div>
 
             {/* Localização */}
@@ -486,8 +470,8 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 name="location"
                 value={formValues.location}
                 onChange={(e) => {
-                  handleInputChange(e);
-                  setSearchValue(e.target.value);
+                  handleInputChange(e)
+                  setSearchValue(e.target.value)
                 }}
                 onBlur={() => handleBlur("location")}
                 list="locations-list"
@@ -496,18 +480,15 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
               />
               <datalist id="locations-list">
                 {locations
-                  .filter((loc) =>
-                    loc.toLowerCase().includes(searchValue.toLowerCase())
-                  )
+                  .filter((loc) => loc.toLowerCase().includes(searchValue.toLowerCase()))
                   .map((loc) => (
                     <option key={loc} value={loc} />
                   ))}
               </datalist>
-              {touched.location && !formValues.location && (
-                <p className="text-sm text-red-500">Bairro é obrigatório</p>
-              )}
+              {touched.location && !formValues.location && <p className="text-sm text-red-500">Bairro é obrigatório</p>}
             </div>
 
+            {/* Modificar a seção do formulário para adicionar o campo "Exclusivo" logo após o "Tipo do Imóvel" */}
             <div className="space-y-2">
               <Label htmlFor="type">Tipo do Imóvel</Label>
               <Select
@@ -525,6 +506,38 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
               </Select>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="exclusive" className="text-base font-medium flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Exclusividade
+              </Label>
+              <div
+                className="flex items-center gap-4 p-4 rounded-md border border-input bg-background hover:bg-accent/10 transition-colors cursor-pointer"
+                onClick={() => setFormValues((prev) => ({ ...prev, exclusive: !prev.exclusive }))}
+              >
+                <div
+                  className={cn(
+                    "relative inline-flex h-7 w-14 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                    formValues.exclusive ? "bg-primary" : "bg-gray-300",
+                  )}
+                >
+                  <span className="sr-only">Toggle exclusividade</span>
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-6 w-6 rounded-full bg-background shadow-lg ring-0 transition-transform",
+                      formValues.exclusive ? "translate-x-7" : "translate-x-0",
+                    )}
+                  />
+                </div>
+                <span className={cn("text-base font-medium", formValues.exclusive ? "text-primary" : "text-gray-600")}>
+                  {formValues.exclusive ? "Imóvel Exclusivo" : "Imóvel Não-Exclusivo"}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Imóveis exclusivos são comercializados apenas por esta imobiliária e recebem destaque especial.
+              </p>
+            </div>
+
             {/* Preço */}
             <div className="space-y-2">
               <Label htmlFor="price">
@@ -533,21 +546,23 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                   <span>Preço</span>
                 </div>
               </Label>
-              <Input
-                id="price"
-                name="price"
-                value={formValues.price}
-                onChange={(e) => {
-                  const formatted = formatCurrency(e.target.value);
-                  setFormValues((prev) => ({ ...prev, price: formatted }));
-                }}
-                onBlur={() => handleBlur("price")}
-                placeholder="Ex: 450000"
-                className={cn(touched.price && !formValues.price && "border-red-500 focus-visible:ring-red-500")}
-              />
-              {touched.price && !formValues.price && (
-                <p className="text-sm text-red-500">Preço é obrigatório</p>
-              )}
+              <div className="flex gap-4 items-center">
+                <div className="flex-1">
+                  <Input
+                    id="price"
+                    name="price"
+                    value={formValues.price}
+                    onChange={(e) => {
+                      const formatted = formatCurrency(e.target.value)
+                      setFormValues((prev) => ({ ...prev, price: formatted }))
+                    }}
+                    onBlur={() => handleBlur("price")}
+                    placeholder="Ex: 450000"
+                    className={cn(touched.price && !formValues.price && "border-red-500 focus-visible:ring-red-500")}
+                  />
+                  {touched.price && !formValues.price && <p className="text-sm text-red-500">Preço é obrigatório</p>}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -577,9 +592,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 onBlur={() => handleBlur("area")}
                 placeholder="Ex: 120"
               />
-              {touched.area && !formValues.area && (
-                <p className="text-sm text-red-500">Área é obrigatória</p>
-              )}
+              {touched.area && !formValues.area && <p className="text-sm text-red-500">Área é obrigatória</p>}
             </div>
 
             {/* Dormitórios */}
@@ -815,9 +828,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 style={{ width: `${uploadProgress}%` }}
               />
             </Progress.Root>
-            <p className="text-sm text-center text-muted-foreground">
-              Enviando... {uploadProgress}%
-            </p>
+            <p className="text-sm text-center text-muted-foreground">Enviando... {uploadProgress}%</p>
           </div>
         )}
 
@@ -828,10 +839,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className={cn(
-                "p-4 rounded-lg",
-                status.type === "success" ? "bg-green-50" : "bg-red-50",
-              )}
+              className={cn("p-4 rounded-lg", status.type === "success" ? "bg-green-50" : "bg-red-50")}
             >
               <div className="flex items-start gap-3">
                 {status.type === "success" ? (
@@ -839,12 +847,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 ) : (
                   <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
                 )}
-                <p
-                  className={cn(
-                    "text-sm font-medium",
-                    status.type === "success" ? "text-green-700" : "text-red-700",
-                  )}
-                >
+                <p className={cn("text-sm font-medium", status.type === "success" ? "text-green-700" : "text-red-700")}>
                   {status.message}
                 </p>
               </div>
@@ -854,16 +857,16 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
 
         {/* Botão de Envio */}
         <Button type="submit" disabled={uploading} className="w-full h-12 text-base font-medium">
-        {uploading ? (
-          <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            Enviando...
-          </>
-        ) : propertyToEdit?.id ? (
-          "Editar Imóvel"
-        ) : (
-          "Cadastrar Imóvel"
-        )}
+          {uploading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Enviando...
+            </>
+          ) : propertyToEdit?.id ? (
+            "Editar Imóvel"
+          ) : (
+            "Cadastrar Imóvel"
+          )}
         </Button>
       </form>
     </div>
