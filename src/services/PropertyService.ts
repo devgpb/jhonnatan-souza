@@ -27,6 +27,14 @@ export const propertyService = {
   
     return response.json();
   },
+
+  async getFeaturedProperties() {
+    const response = await fetch(`${API_BASE}/featured`);
+    if (!response.ok) {
+      throw new Error("Erro ao buscar propriedades em destaque");
+    }
+    return response.json();
+  },
   
 
   async getPropertyById(id: string) {
@@ -76,5 +84,21 @@ export const propertyService = {
       throw new Error("Erro ao marcar propriedade como vendida");
     }
     return response.json();
-  }
+  },
+
+
+  async markAsFeatured(id: string) {
+    const response = await fetch(`${API_BASE}/featured`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ propertyId: id }),
+    });
+    if (!response.ok) {
+      throw new Error("Erro ao marcar propriedade como destaque");
+    }
+    return response.json();
+  },
+
 };

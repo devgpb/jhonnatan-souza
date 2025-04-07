@@ -23,6 +23,8 @@ const buttonVariants = cva(
         accent: "bg-accent text-white hover:bg-accent/90 shadow-md hover:shadow-lg",
         // Novo variant "success" em verde
         success: "bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg",
+        yellow: "bg-yellow-500 text-white hover:bg-yellow-600 shadow-md hover:shadow-lg",
+        star: "border border-input bg-background text-yellow-500 hover:bg-yellow-200 shadow-md hover:shadow-lg",
       },
       size: {
         default: "h-10 px-4 py-2",

@@ -64,7 +64,7 @@ export function SideColumn() {
               Vendidos
             </button>
             <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-white/60 rounded-md"
-             onClick={() => handleImoveis("/admin/listagem")}>
+             onClick={() => handleImoveis("/admin/listagem?featured=true")}>
               Em Destaque
             </button>
           </div>

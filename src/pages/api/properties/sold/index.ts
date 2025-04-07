@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // 1) Busca a propriedade atual
     const { data: currentProperty, error: selectError } = await supabase
       .from('properties')
-      .select('id, sold')
+      .select('id, sold, featured')
       .eq('id', propertyId)
       .single()
 
@@ -36,6 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         sold: !isCurrentlySold,
         sell_date: isCurrentlySold ? null : new Date(),
         status: isCurrentlySold ? 'disponível' : 'vendido',
+        featured: !isCurrentlySold ? false : currentProperty.featured,
       })
       .eq('id', propertyId)
 

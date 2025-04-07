@@ -1,8 +1,8 @@
 import type React from "react"
 import { Button } from "@/components/ui/button"
-import { Plus, Trash, RefreshCw, Pen, DollarSign } from "lucide-react"
+import { Plus, Trash, RefreshCw, Pen, DollarSign, Star } from "lucide-react"
 
-type ActionType = "create" | "delete" | "update" | "sold" | "unsold"
+type ActionType = "create" | "delete" | "update" | "sold" | "unsold" | "edit" | "featured" | "unfeatured"
 
 interface ActionButtonProps {
   type: ActionType
@@ -22,8 +22,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({ type, onClick, disabled = f
         }
       case "delete":
         return {
-          icon: <Trash className="mr-2 h-4 w-4" />,
-          text: "Deletar",
+          icon: <Trash className="h-4 w-4" />,
+          // text: "Deletar",
           variant: "destructive" as const,
         }
       case "update":
@@ -32,17 +32,34 @@ const ActionButton: React.FC<ActionButtonProps> = ({ type, onClick, disabled = f
           text: "Atualizar",
           variant: "outline" as const,
         }
+      case "edit":
+        return {
+          icon: <Pen className="h-4 w-4" />,
+          variant: "yellow" as const,
+        }
       case "sold":
         return {
-          icon: <DollarSign className="mr-2 h-4 w-4" />,
-          text: "Marcar como vendido",
+          icon: <DollarSign className="h-4 w-4" />,
+          // text: "Marcar como vendido",
           variant: "success" as const,
         }
       case "unsold":
         return {
-          icon: <RefreshCw className="mr-2 h-4 w-4" />,
-          text: "Desmarcar vendido",
+          icon: <RefreshCw className="h-4 w-4" />,
+          // text: "Desmarcar vendido",
           variant: "outline" as const,
+        }
+      case "featured":
+        return {
+          icon: <Star className="h-4 w-4 fill-yellow-500" />,
+          // text: "Desmarcar vendido",
+          variant: "star" as const,
+        }
+      case "unfeatured":
+        return {
+          icon: <Star className="h-4 w-4" />,
+          // text: "Desmarcar vendido",
+          variant: "star" as const,
         }
     }
   }

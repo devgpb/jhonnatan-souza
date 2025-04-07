@@ -136,6 +136,11 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
     onDelete()
   }
 
+  const handleFeatured = async (property: Property) => {
+    await propertyService.markAsFeatured(property.id)
+    onDelete()
+  }
+
   const sortedProperties = [...filteredProperties].sort((a, b) => {
     const aValue = a[sortColumn]
     const bValue = b[sortColumn]
@@ -226,18 +231,26 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{property.brokers?.name || "Não atribuído"}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 flex items-center">
                   
                   {property.sold ? (
-                    <ActionButton onClick={() => handleSold(property)} type="unsold" />
+                    <ActionButton onClick={() => handleSold(property)} type="unsold"className="mr-1"/>
                   ) : 
-                  (<ActionButton onClick={() => handleSold(property)} type="sold" />
+                  (<ActionButton onClick={() => handleSold(property)} type="sold" className="mr-1"/>
                   )}
 
-                  <ActionButton 
-                    onClick={() => onEdit(property)} 
-                    type="update" 
-                  />
+                  <ActionButton onClick={() => onEdit(property)} type="edit" className="mr-1"/>
+
+                  {property.featured ? (
+                    <ActionButton onClick={() => handleFeatured(property)} type="featured" className="mr-1"/>
+                  ) : 
+                  ( <ActionButton onClick={() => handleFeatured(property)} type="unfeatured" className="mr-1"/>
+                  )}
+
+                  
+                  
+
+
                   <ActionButton onClick={() => handleDelete(property)} type="delete" />
 
                   </td>
