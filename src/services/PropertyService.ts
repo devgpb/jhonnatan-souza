@@ -100,5 +100,19 @@ export const propertyService = {
     }
     return response.json();
   },
-
-};
+  
+ //Service para propriedades exclusivas 
+  async markAsExclusive(id: string) {
+    const response = await fetch(`${API_BASE}/exclusive`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({propertyId: id}),
+    });
+    if (!response.ok){
+      throw new Error("Erro ao marcar propriedade como exclusiva");
+    }
+    return response.json();
+  },
+}
