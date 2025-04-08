@@ -44,6 +44,8 @@ model properties {
   status      String            @default("disponível") @db.VarChar
   sell_date   DateTime?         @db.Date
   type        properties_types?
+  featured    Boolean?
+  exclusive   Boolean?          @default(false)
   brokers     brokers?          @relation(fields: [broker_id], references: [id], onUpdate: NoAction)
 }
 
