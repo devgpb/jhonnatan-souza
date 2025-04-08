@@ -76,6 +76,7 @@ export default function PenthousesPage() {
   return (
     <>
       <MainLayout>
+      <div className="h-16"></div>
         <FilterBar onSearch={handleSearch} />
         <main className="container py-16">
           <div className="flex items-center justify-between mb-8">
