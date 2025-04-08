@@ -529,9 +529,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                     )}
                   />
                 </div>
-                <span className={cn("text-base font-medium", formValues.exclusive ? "text-primary" : "text-gray-600")}>
-                  {formValues.exclusive ? "Imóvel Exclusivo" : "Imóvel Não-Exclusivo"}
-                </span>
+                
               </div>
               <p className="text-sm text-muted-foreground">
                 Imóveis exclusivos são comercializados apenas por esta imobiliária e recebem destaque especial.
