@@ -4,20 +4,32 @@ import { supabase } from '@/lib/supabase'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    // Buscar todas as locations existentes
     const { data: locationsData, error: locationsError } = await supabase
       .from('properties')
       .select('location')
 
     if (locationsError) throw locationsError
 
-    const distinctLocations = [...new Set(locationsData.map(item => item.location))].filter(Boolean)
+    // Limpar dados: remove duplicados e entradas nulas ou vazias
+    const distinctLocations = [
+      ...new Set(
+        locationsData
+          .map(item => typeof item.location === 'string' ? item.location.trim() : null)
+          .filter(Boolean)
+      )
+    ]
 
+    // Função para buscar imóveis por location e tipo
     const fetchPropertiesByLocationAndType = async (location: string, keyword: string) => {
+      const safeLocation = typeof location === 'string' ? location.trim() : ''
+      const safeKeyword = typeof keyword === 'string' ? keyword.trim() : ''
+
       const { data, error } = await supabase
         .from('properties')
         .select('id, images')
-        .ilike('location', `%${location}%`)
-        .ilike('title', `%${keyword}%`)
+        .ilike('location', `%${safeLocation}%`)
+        .ilike('title', `%${safeKeyword}%`)
         .limit(1)
         .single()
 
@@ -25,13 +37,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return data
     }
 
+    // Montar estrutura final de bairros com imóveis
     const featuredLocations = await Promise.all(
-      distinctLocations.map(async (location) => {
+      distinctLocations.map(async (locationRaw) => {
+        const location = String(locationRaw)
+    
         const principal = await fetchPropertiesByLocationAndType(location, location)
         const apartamento = await fetchPropertiesByLocationAndType(location, 'Apartamento')
         const casa = await fetchPropertiesByLocationAndType(location, 'Casa')
         const cobertura = await fetchPropertiesByLocationAndType(location, 'Cobertura')
-
+    
         return {
           location,
           description: `Explore as melhores opções em ${location}.`,

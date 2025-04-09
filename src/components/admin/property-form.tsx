@@ -480,7 +480,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
               />
               <datalist id="locations-list">
                 {locations
-                  .filter((loc) => loc.toLowerCase().includes(searchValue.toLowerCase()))
+                  .filter((loc) => typeof loc === 'string' && loc.toLowerCase().includes(searchValue.toLowerCase()))
                   .map((loc) => (
                     <option key={loc} value={loc} />
                   ))}
