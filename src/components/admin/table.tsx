@@ -8,7 +8,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import type { Property } from "@/types/property"
 import ActionButton from "@/components/ui/action-button"
 import { propertyService } from "@/services/PropertyService"
-import { TableFilter } from "./table-filter"
+import { PropertyFilters } from "../property-filter"
 import { brokerService } from "@/services/BrokerService"
 
 interface PropertiesTableProps {
@@ -17,10 +17,16 @@ interface PropertiesTableProps {
   onEdit: (property: any) => void
 }
 
+// Colunas que podem ser ordenadas
 type SortableColumns = "title" | "location" | "price" | "area"
 
-interface TableFilters {
-  neighborhoods: string[]
+/**
+ * Atualizamos a interface dos filtros para refletir a nova estrutura:
+ * - `location`: bairro único (string) em vez de um array de bairros.
+ * - Os demais filtros permanecem como array, permitindo seleção múltipla.
+ */
+export interface TableFilters {
+  location: string
   areas: string[]
   prices: string[]
   statuses: string[]
@@ -36,41 +42,42 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
   const itemsPerPage = 10
   const [brokersList, setBrokersList] = useState<{ id: string; name: string }[]>([])
 
+  // Sempre que as propriedades originais mudam, atualizamos a lista filtrada
   useEffect(() => {
     setFilteredProperties(properties)
   }, [properties])
 
+  // Carrega a lista de corretores
   useEffect(() => {
-    brokerService.getBrokers().then((data:any) => {
+    brokerService.getBrokers().then((data: any) => {
       const mapped = data.map((b: any) => ({ id: String(b.id), name: b.name }))
       setBrokersList(mapped)
     })
   }, [])
 
+  // Função de filtragem usando a nova interface dos filtros
   const handleFilter = (filters: TableFilters) => {
     let filtered = [...properties]
 
-    // Apply search filter
+    // Filtra pela busca geral
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
       filtered = filtered.filter(
         (property) =>
           property.title?.toLowerCase().includes(searchLower) ||
           property.location?.toLowerCase().includes(searchLower) ||
-          property.brokers?.name.toLowerCase().includes(searchLower),
+          property.brokers?.name.toLowerCase().includes(searchLower)
       )
     }
 
-    // Apply neighborhood filter
-    if (filters.neighborhoods.length > 0) {
+    // Filtra pelo bairro (location) – agora é único
+    if (filters.location !== "") {
       filtered = filtered.filter((property) =>
-        filters.neighborhoods.some((neighborhood) =>
-          property.location?.toLowerCase().includes(neighborhood.toLowerCase()),
-        ),
+        property.location?.toLowerCase().includes(filters.location.toLowerCase())
       )
     }
 
-    // Apply area filter
+    // Filtra pela área
     if (filters.areas.length > 0) {
       filtered = filtered.filter((property) => {
         const area = property.area
@@ -86,7 +93,7 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
       })
     }
 
-    // Apply price filter
+    // Filtra pelo preço
     if (filters.prices.length > 0) {
       filtered = filtered.filter((property) => {
         const price = property.price
@@ -105,7 +112,7 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
       })
     }
 
-    // Apply status filter
+    // Filtra pelo status
     if (filters.statuses.length > 0) {
       filtered = filtered.filter((property) => {
         if (filters.statuses.includes("sold") && property.sold) return true
@@ -115,17 +122,18 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
       })
     }
 
-    // Apply broker filter
+    // Filtra pelo corretor
     if (filters.brokers.length > 0) {
       filtered = filtered.filter((property) =>
-        filters.brokers.includes(String(property.brokers?.id || "")),
+        filters.brokers.includes(String(property.brokers?.id || ""))
       )
     }
 
     setFilteredProperties(filtered)
-    setCurrentPage(1) // Reset to first page when filtering
+    setCurrentPage(1) // Reseta para a primeira página
   }
 
+  // Ações de deletar, marcar como vendido ou em destaque
   const handleDelete = async (property: Property) => {
     await propertyService.deleteProperty(property.id)
     onDelete()
@@ -141,6 +149,7 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
     onDelete()
   }
 
+  // Ordenação dos imóveis
   const sortedProperties = [...filteredProperties].sort((a, b) => {
     const aValue = a[sortColumn]
     const bValue = b[sortColumn]
@@ -154,7 +163,10 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
   })
 
   const totalPages = Math.ceil(filteredProperties.length / itemsPerPage)
-  const paginatedProperties = sortedProperties.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const paginatedProperties = sortedProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   const handleSort = (column: SortableColumns) => {
     if (sortColumn === column) {
@@ -167,17 +179,17 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
 
   const SortIcon = ({ column }: { column: SortableColumns }) => {
     if (sortColumn !== column) return null
-    return sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+    return sortDirection === "asc" ? (
+      <ChevronUp className="h-4 w-4" />
+    ) : (
+      <ChevronDown className="h-4 w-4" />
+    )
   }
-
-  // Get unique brokers from properties
-  const brokers = Array.from(
-    new Set(properties.map((p) => p.brokers).filter((b): b is NonNullable<typeof b> => b !== undefined)),
-  )
 
   return (
     <div className="space-y-4">
-      <TableFilter
+      {/* Usando o novo PropertyFilters */}
+      <PropertyFilters
         onFilter={handleFilter}
         brokers={brokersList}
       />
@@ -224,35 +236,53 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
                 <tr key={property.id} className="border-b">
                   <td className="px-4 py-3">{property.title}</td>
                   <td className="px-4 py-3 text-muted-foreground">{property.location}</td>
-                  <td className="px-4 py-3">{property.price ? formatCurrency(property.price) : "Sob Consulta"}</td>
+                  <td className="px-4 py-3">
+                    {property.price ? formatCurrency(property.price) : "Sob Consulta"}
+                  </td>
                   <td className="px-4 py-3">
                     <Badge variant={property.sold ? "success" : "default"}>
                       {property.sold ? "Vendido" : "Disponível"}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{property.brokers?.name || "Não atribuído"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {property.brokers?.name || "Não atribuído"}
+                  </td>
                   <td className="px-4 py-3 flex items-center">
-                  
-                  {property.sold ? (
-                    <ActionButton onClick={() => handleSold(property)} type="unsold"className="mr-1"/>
-                  ) : 
-                  (<ActionButton onClick={() => handleSold(property)} type="sold" className="mr-1"/>
-                  )}
-
-                  <ActionButton onClick={() => onEdit(property)} type="edit" className="mr-1"/>
-
-                  {property.featured ? (
-                    <ActionButton onClick={() => handleFeatured(property)} type="featured" className="mr-1"/>
-                  ) : 
-                  ( <ActionButton onClick={() => handleFeatured(property)} type="unfeatured" className="mr-1"/>
-                  )}
-
-                  
-                  
-
-
-                  <ActionButton onClick={() => handleDelete(property)} type="delete" />
-
+                    {property.sold ? (
+                      <ActionButton
+                        onClick={() => handleSold(property)}
+                        type="unsold"
+                        className="mr-1"
+                      />
+                    ) : (
+                      <ActionButton
+                        onClick={() => handleSold(property)}
+                        type="sold"
+                        className="mr-1"
+                      />
+                    )}
+                    <ActionButton
+                      onClick={() => onEdit(property)}
+                      type="edit"
+                      className="mr-1"
+                    />
+                    {property.featured ? (
+                      <ActionButton
+                        onClick={() => handleFeatured(property)}
+                        type="featured"
+                        className="mr-1"
+                      />
+                    ) : (
+                      <ActionButton
+                        onClick={() => handleFeatured(property)}
+                        type="unfeatured"
+                        className="mr-1"
+                      />
+                    )}
+                    <ActionButton
+                      onClick={() => handleDelete(property)}
+                      type="delete"
+                    />
                   </td>
                 </tr>
               ))}
@@ -260,7 +290,7 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
           </table>
         </div>
 
-        {/* Pagination */}
+        {/* Paginação */}
         <div className="flex items-center justify-between px-4 py-4 border-t">
           <p className="text-sm text-muted-foreground">
             Mostrando {(currentPage - 1) * itemsPerPage + 1} até{" "}
@@ -299,4 +329,3 @@ export function PropertiesTable({ properties, onDelete, onEdit }: PropertiesTabl
     </div>
   )
 }
-

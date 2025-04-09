@@ -28,6 +28,22 @@ export const propertyService = {
     return response.json();
   },
 
+  async getPropertiesList(filters = {}) {
+    const url = `${API_BASE}/list`;
+  
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(filters),
+    });
+  
+    if (!response.ok) {
+      throw new Error("Erro ao buscar propriedades");
+    }
+  
+    return response.json();
+  },
+
   async getFeaturedProperties() {
     const response = await fetch(`${API_BASE}/featured`);
     if (!response.ok) {
