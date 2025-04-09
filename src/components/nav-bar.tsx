@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState, useRef } from "react"
+import { useRouter } from "next/router"
 import Link from "next/link"
 import { Menu, Search, X, User, ArrowRight, Building2, Home, Building, ChevronDown, MapPin } from "lucide-react"
 import { Button } from "./ui/button"
@@ -39,6 +40,8 @@ export function NavBar({ background = false }: NavBarProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isFocused, setIsFocused] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+
 
   // Popular search suggestions
   const popularSearches = [
@@ -161,6 +164,21 @@ export function NavBar({ background = false }: NavBarProps) {
     }
   }, [isSearchOpen])
 
+  // Sugestões de busca
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions([])
+      return
+    }
+  
+    const filtered = popularSearches.filter((item) =>
+      item.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  
+    setSuggestions(filtered)
+  }, [searchQuery])
+  
+
   const formatPrice = (price: number) => {
     return price.toLocaleString("pt-BR", {
       style: "currency",
@@ -168,12 +186,17 @@ export function NavBar({ background = false }: NavBarProps) {
       maximumFractionDigits: 0,
     })
   }
+  const router = useRouter()
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle search submission
-    console.log("Search submitted:", searchQuery)
-    // You would typically redirect to search results page here
+  
+    if (!searchQuery.trim()) return
+  
+    const query = encodeURIComponent(searchQuery.trim())
+  
+    router.push(`/imoveis?search=${query}`)
+    setIsSearchOpen(false)
   }
 
   return (
@@ -525,6 +548,26 @@ export function NavBar({ background = false }: NavBarProps) {
               )}
             </div>
 
+            {/* Sugestões dinâmicas */}
+            {suggestions.length > 0 && (
+              <div className="bg-[#0c1e20] rounded-lg mt-2 border border-[#fabc3f]/20">
+                {suggestions.map((suggestion, index) => (
+                 <button
+                    key={index}
+                    type="button"
+                    onClick={() => {
+                      const query = encodeURIComponent(suggestion)
+                     router.push(`/imoveis?search=${query}`)
+                      setIsSearchOpen(false)
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#fabc3f]/10 text-white transition"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Popular searches */}
             <div className="flex flex-col space-y-4">
               <div className="flex items-center gap-2">
@@ -534,23 +577,27 @@ export function NavBar({ background = false }: NavBarProps) {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {popularSearches.map((search, index) => (
+              {popularSearches.map((search, index) => (
                   <button
-                    key={index}
-                    type="button"
-                    onClick={() => setSearchQuery(search)}
+                   key={index}
+                   type="button"
+                   onClick={() => {
+                     const query = encodeURIComponent(search)
+                      router.push(`/imoveis?search=${query}`)
+                      setIsSearchOpen(false)
+                   }}
                     className={`
-                      px-4 py-2 rounded-full text-sm
-                      transition-all duration-300
-                      ${
-                        searchQuery === search
-                          ? "bg-[#fabc3f] text-[#0c1e20] font-medium"
+                     px-4 py-2 rounded-full text-sm
+                     transition-all duration-300
+                     ${
+                       searchQuery === search
+                         ? "bg-[#fabc3f] text-[#0c1e20] font-medium"
                           : "bg-[#fabc3f]/10 text-gray-300 hover:bg-[#fabc3f]/20 hover:text-white"
-                      }
+                    }
                     `}
-                  >
+                 >
                     {search}
-                  </button>
+                 </button>
                 ))}
               </div>
             </div>
