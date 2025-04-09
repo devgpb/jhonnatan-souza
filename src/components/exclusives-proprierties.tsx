@@ -198,7 +198,16 @@ export function ExclusiveProperties() {
 
                       <div className="p-6">
                         <div className="space-y-4">
-                          <div className="flex justify-between items-center">
+                        <div className="flex flex-col">
+                            <p
+                              className="text-lg sm:text-xl font-bold mb-2"
+                              style={{
+                                color: "#fabc3f",
+                                textShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                              }}
+                            >
+                              {property.title}
+                            </p>
                             <p
                               className="text-2xl sm:text-3xl font-bold"
                               style={{
@@ -208,7 +217,6 @@ export function ExclusiveProperties() {
                             >
                               {formatPrice(Number(property.price))}
                             </p>
-                            
                           </div>
 
                           <div className="flex justify-between text-white">
