@@ -63,13 +63,13 @@ export default function PropertiesPage() {
   // Efeito que atualiza os estados de imóveis filtrados sempre que `allProperties` mudar
   useEffect(() => {
     setApartments(
-      allProperties.filter((p) => normalize(p.type).includes("apartamento"))
+      allProperties.filter((p) => p.type == "apartamento")
     )
     setHouses(
-      allProperties.filter((p) => normalize(p.type).includes("casa"))
+      allProperties.filter((p) => p.type == "casa")
     )
     setPenthouses(
-      allProperties.filter((p) => normalize(p.type).includes("cobertura"))
+      allProperties.filter((p) => p.type == "cobertura")
     )
   }, [allProperties])
 
