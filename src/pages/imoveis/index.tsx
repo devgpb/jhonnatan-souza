@@ -31,6 +31,7 @@ type Property = {
   parking: number
   images: string[]
   location: string
+  type: "casa" | "apartamento" | "cobertura"
   title: string
   brokers: Broker
 }
@@ -62,13 +63,13 @@ export default function PropertiesPage() {
   // Efeito que atualiza os estados de imóveis filtrados sempre que `allProperties` mudar
   useEffect(() => {
     setApartments(
-      allProperties.filter((p) => normalize(p.title).includes("apartamento"))
+      allProperties.filter((p) => normalize(p.type).includes("apartamento"))
     )
     setHouses(
-      allProperties.filter((p) => normalize(p.title).includes("casa"))
+      allProperties.filter((p) => normalize(p.type).includes("casa"))
     )
     setPenthouses(
-      allProperties.filter((p) => normalize(p.title).includes("cobertura"))
+      allProperties.filter((p) => normalize(p.type).includes("cobertura"))
     )
   }, [allProperties])
 
@@ -97,21 +98,21 @@ export default function PropertiesPage() {
   const handleCasas = () => {
     handleSearch({
       ...filters,
-      type: "casas",
+      type: "casa",
     })
   }
 
   const handleApartamentos = () => {
     handleSearch({
       ...filters,
-      type: "apartamentos",
+      type: "apartamento",
     })
   }
 
   const handleCoberturas = () => {
     handleSearch({
       ...filters,
-      type: "coberturas",
+      type: "cobertura",
     })
   }
 

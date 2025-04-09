@@ -12,12 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+// Define as opções de filtro para cada campo
 interface FilterOption {
   id: string
   label: string
 }
 
-// Filtros fixos
 const location: FilterOption[] = [
   { id: "itaim-bibi", label: "Itaim Bibi" },
   { id: "jardim-paulista", label: "Jardim Paulista" },
@@ -51,8 +51,15 @@ const statusOptions: FilterOption[] = [
   { id: "featured", label: "Em Destaque" },
 ]
 
+// NOVO: Opções para o filtro de tipo de imóvel
+const propertyTypes: FilterOption[] = [
+  { id: "casa", label: "Casa" },
+  { id: "apartamento", label: "Apartamento" },
+  { id: "cobertura", label: "Cobertura" },
+]
+
 /**
- * Componente para dropdown de seleção única (ex.: Bairro)
+ * Componente para dropdown de seleção única (ex.: Bairro e Tipo)
  */
 interface FilterDropdownSingleProps {
   title: string
@@ -86,14 +93,12 @@ function FilterDropdownSingle({
       <DropdownMenuContent align="start" className="w-[280px] p-3">
         <div className="space-y-3">
           <h3 className="font-medium text-base">{title}</h3>
-
           <Input
             placeholder={`Buscar ${title.toLowerCase()}`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="text-sm"
           />
-
           {selected !== "" && (
             <ScrollArea className="max-h-[100px]">
               <div className="flex flex-wrap gap-2">
@@ -120,7 +125,6 @@ function FilterDropdownSingle({
               </div>
             </ScrollArea>
           )}
-
           <ScrollArea className="max-h-[200px]">
             <div className="grid gap-2">
               {filteredOptions.map((option) => (
@@ -142,7 +146,7 @@ function FilterDropdownSingle({
 }
 
 /**
- * Para os demais filtros (que permitem múltipla seleção) você pode manter o componente abaixo
+ * Componente para dropdown de seleção múltipla (ex.: Área, Valor etc.)
  */
 interface FilterDropdownProps {
   title: string
@@ -176,14 +180,12 @@ function FilterDropdown({
       <DropdownMenuContent align="start" className="w-[280px] p-3">
         <div className="space-y-3">
           <h3 className="font-medium text-base">{title}</h3>
-
           <Input
             placeholder={`Buscar ${title.toLowerCase()}`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="text-sm"
           />
-
           {selected.length > 0 && (
             <ScrollArea className="max-h-[100px]">
               <div className="flex flex-wrap gap-2">
@@ -211,7 +213,6 @@ function FilterDropdown({
               </div>
             </ScrollArea>
           )}
-
           <ScrollArea className="max-h-[200px]">
             <div className="grid gap-2">
               {filteredOptions.map((option) => (
@@ -233,10 +234,11 @@ function FilterDropdown({
 }
 
 /**
- * Interface de filtros. Note que alteramos "locations" para "location",
- * já que agora será uma string única.
+ * Atualize a interface dos filtros para incluir o novo campo "type"
+ * (representando o tipo de imóvel: casa, apartamento ou cobertura).
  */
 export interface TableFilters {
+  type: string
   location: string
   areas: string[]
   prices: string[]
@@ -246,18 +248,11 @@ export interface TableFilters {
 }
 
 /**
- * Componente principal de filtros
+ * Componente principal dos filtros
  */
 interface TableFilterProps {
   onFilter: (filters: TableFilters) => void
-  /**
-   * Caso você já carregue corretoras do backend,
-   * você pode passá-las por props aqui.
-   */
   brokers?: { id: string; name: string }[]
-  /**
-   * Filtros iniciais (por exemplo, lidos da query)
-   */
   initialFilters?: Partial<TableFilters>
 }
 
@@ -266,8 +261,9 @@ export function PropertyFilters({
   brokers = [],
   initialFilters = {},
 }: TableFilterProps) {
-  // Desestruturando os filtros iniciais
+  // Desestrutura os filtros iniciais, incluindo o novo "type"
   const {
+    type: initialType = "",
     location: initialLocation = "",
     areas: initialAreas = [],
     prices: initialPrices = [],
@@ -276,24 +272,22 @@ export function PropertyFilters({
     search: initialSearch = "",
   } = initialFilters
 
-  // Estado único para bairro (location)
-  const [selectedLocation, setSelectedLocation] = useState<string>(initialLocation)
+  // Estado para o novo filtro de tipo (seleção única)
+  const [selectedType, setSelectedType] = useState<string>(initialType)
 
   // Estados para os demais filtros
+  const [selectedLocation, setSelectedLocation] = useState<string>(initialLocation)
   const [selectedAreas, setSelectedAreas] = useState<string[]>(initialAreas)
   const [selectedPrices, setSelectedPrices] = useState<string[]>(initialPrices)
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>(initialStatuses)
   const [selectedBrokers, setSelectedBrokers] = useState<string[]>(initialBrokers)
   const [searchQuery, setSearchQuery] = useState(initialSearch)
 
-  // Handlers para filtros de seleção múltipla (ex.: Área, Valor, etc.)
+  // Handlers para filtros de seleção múltipla (ex.: área, preço, etc.)
   const handleSelect = (
     setter: React.Dispatch<React.SetStateAction<string[]>>
   ) => (id: string) => {
-    setter((prev) => {
-      if (prev.includes(id)) return prev
-      return [...prev, id]
-    })
+    setter((prev) => (prev.includes(id) ? prev : [...prev, id]))
   }
 
   const handleRemove = (
@@ -302,7 +296,7 @@ export function PropertyFilters({
     setter((prev) => prev.filter((item) => item !== id))
   }
 
-  // Handlers para o filtro único (Bairro)
+  // Handlers para o filtro único de "Bairro"
   const handleLocationSelect = (id: string) => {
     setSelectedLocation(id)
   }
@@ -310,9 +304,18 @@ export function PropertyFilters({
     setSelectedLocation("")
   }
 
-  // Ação de filtrar
+  // Handlers para o novo filtro de "Tipo"
+  const handleTypeSelect = (id: string) => {
+    setSelectedType(id)
+  }
+  const handleTypeRemove = () => {
+    setSelectedType("")
+  }
+
+  // Ação ao clicar em filtrar
   const handleSearch = () => {
     onFilter({
+      type: selectedType,
       location: selectedLocation,
       areas: selectedAreas,
       prices: selectedPrices,
@@ -322,7 +325,7 @@ export function PropertyFilters({
     })
   }
 
-  // Filtra ao apertar Enter no campo de busca
+  // Filtra ao pressionar Enter
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       handleSearch()
@@ -334,8 +337,9 @@ export function PropertyFilters({
     label: broker.name,
   }))
 
-  // Verifica se há algum filtro selecionado
+  // Verifica se algum filtro está selecionado
   const filtersSelected =
+    selectedType !== "" ||
     selectedLocation !== "" ||
     selectedAreas.length > 0 ||
     selectedPrices.length > 0 ||
@@ -345,6 +349,7 @@ export function PropertyFilters({
 
   // Função para resetar todos os filtros
   const handleReset = () => {
+    setSelectedType("")
     setSelectedLocation("")
     setSelectedAreas([])
     setSelectedPrices([])
@@ -352,6 +357,7 @@ export function PropertyFilters({
     setSelectedBrokers([])
     setSearchQuery("")
     onFilter({
+      type: "",
       location: "",
       areas: [],
       prices: [],
@@ -364,7 +370,7 @@ export function PropertyFilters({
   return (
     <div className="bg-white p-4 shadow-sm rounded-lg space-y-4">
       <div className="flex flex-wrap gap-3 items-center">
-        {/* BUSCA LIVRE */}
+        {/* Busca livre */}
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
@@ -376,7 +382,7 @@ export function PropertyFilters({
           />
         </div>
 
-        {/* BAIRRO: uso do dropdown de seleção única */}
+        {/* Filtro para Bairro (seleção única) */}
         <FilterDropdownSingle
           title="Bairro"
           options={location}
@@ -385,7 +391,16 @@ export function PropertyFilters({
           onRemove={handleLocationRemove}
         />
 
-        {/* ÁREA */}
+        {/* Novo filtro para Tipo de imóvel (seleção única) */}
+        <FilterDropdownSingle
+          title="Tipo"
+          options={propertyTypes}
+          selected={selectedType}
+          onSelect={handleTypeSelect}
+          onRemove={handleTypeRemove}
+        />
+
+        {/* Filtro para Área */}
         <FilterDropdown
           title="Área"
           options={areaRanges}
@@ -394,7 +409,7 @@ export function PropertyFilters({
           onRemove={handleRemove(setSelectedAreas)}
         />
 
-        {/* VALOR */}
+        {/* Filtro para Valor */}
         <FilterDropdown
           title="Valor"
           options={priceRanges}
@@ -403,7 +418,7 @@ export function PropertyFilters({
           onRemove={handleRemove(setSelectedPrices)}
         />
 
-        {/* STATUS */}
+        {/* Filtro para Status */}
         <FilterDropdown
           title="Status"
           options={statusOptions}
@@ -412,7 +427,7 @@ export function PropertyFilters({
           onRemove={handleRemove(setSelectedStatuses)}
         />
 
-        {/* CORRETOR */}
+        {/* Filtro para Corretor */}
         <FilterDropdown
           title="Corretor"
           options={brokerOptions}
@@ -421,19 +436,15 @@ export function PropertyFilters({
           onRemove={handleRemove(setSelectedBrokers)}
         />
 
-        {/* BOTÃO FILTRAR */}
+        {/* Botão para filtrar */}
         <Button onClick={handleSearch} className="h-10 px-6">
           <Search className="h-4 w-4 mr-2" />
           Filtrar
         </Button>
 
-        {/* BOTÃO RESETAR (exibido se houver algum filtro) */}
+        {/* Botão para resetar filtros se houver algum selecionado */}
         {filtersSelected && (
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            className="h-10 px-6"
-          >
+          <Button onClick={handleReset} variant="outline" className="h-10 px-6">
             Resetar
           </Button>
         )}

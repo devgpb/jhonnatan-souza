@@ -13,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         limit = 20,
 
         // do front-end:
+        type = "",
         location = "",
         areas = [],
         prices = [],
@@ -31,6 +32,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Exemplo: se você quiser filtrar por "search" em `id` ou `title`
       if (search) {
         baseQuery = baseQuery.or(`id.ilike.%${search}%,title.ilike.%${search}%`);
+      }
+
+      if (type) {
+        baseQuery = baseQuery.eq('type', type);
       }
 
       // ---------- Filtro de LOCATIONS (array) ---------------
