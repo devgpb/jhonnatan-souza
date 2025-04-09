@@ -127,6 +127,7 @@ export default function PropertiesPage() {
       suites={property.suites}
       location={property.location}
       parking={property.parking}
+      title={property.title}
       broker={{
         name: property.brokers.name,
         company: property.brokers.company || "N/A",

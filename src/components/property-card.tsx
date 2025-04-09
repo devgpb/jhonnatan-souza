@@ -11,6 +11,7 @@ interface PropertyCardProps {
   suites: number;
   parking: number;
   location: string;
+  title: string;
   broker: {
     name: string;
     company: string;
@@ -18,7 +19,7 @@ interface PropertyCardProps {
   };
 }
 
-export function PropertyCard({ id, image, price, area, suites, parking, location, broker }: PropertyCardProps) {
+export function PropertyCard({ id, image, price, area, suites, parking, location, title, broker }: PropertyCardProps) {
   return (
     <Link href={`/imovel/${id}`}>
       <Card className="group overflow-hidden">
@@ -49,13 +50,18 @@ export function PropertyCard({ id, image, price, area, suites, parking, location
 
         <CardContent className="p-3 md:p-4">
           <div className="space-y-1 md:space-y-2">
-            <p className="text-lg md:text-2xl font-semibold">
+          <div>
+            <h3 className="text-base md:text-lg font-medium line-clamp-2 group-hover:text-primary transition-colors">
+              {title}
+            </h3>
+            <p className="text-lg md:text-2xl font-semibold mt-1">
               {price.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
                 maximumFractionDigits: 0,
               })}
             </p>
+          </div>
             <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Square className="h-4 w-4" />
