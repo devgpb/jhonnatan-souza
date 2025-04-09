@@ -10,6 +10,7 @@ import { Button } from "./ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet"
 import Image from "next/image"
 import EnterLogo from "./ui/enter-logo"
+import { supabase } from "@/lib/supabase"
 
 // Tipar as propriedades, permitindo receber "background"
 interface NavBarProps {
@@ -41,16 +42,9 @@ export function NavBar({ background = false }: NavBarProps) {
   const [isFocused, setIsFocused] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const [popularLocations, setPopularLocations] = useState<string[]>([])
 
 
-  // Popular search suggestions
-  const popularSearches = [
-    "Apartamento 3 quartos",
-    "Casa com piscina",
-    "Cobertura duplex",
-    "Imóvel na zona sul",
-    "Apartamento com varanda",
-  ]
 
   // Estado que substitui seus mocks
   const [categories, setCategories] = useState<CategoryType[]>([
@@ -165,18 +159,43 @@ export function NavBar({ background = false }: NavBarProps) {
   }, [isSearchOpen])
 
   // Sugestões de busca
-  useEffect(() => {
-    if (!searchQuery.trim()) {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchQuery(value)
+  
+    if (value.length < 2) {
       setSuggestions([])
       return
     }
   
-    const filtered = popularSearches.filter((item) =>
-      item.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    try {
+      const res = await fetch(`/api/search-suggestion?query=${encodeURIComponent(value)}`)
+      const json = await res.json()
+      setSuggestions(json.suggestions || [])
+    } catch (error) {
+      console.error('Erro ao buscar sugestões:', error)
+    }
+  }
   
-    setSuggestions(filtered)
-  }, [searchQuery])
+  useEffect(() => {
+    async function fetchPopularLocations() {
+      try {
+        const { data, error } = await supabase
+          .from("properties")
+          .select("location")
+        
+        if (error) throw error
+  
+        const uniqueLocations = Array.from(new Set(data.map(item => item.location).filter(Boolean)))
+  
+        setPopularLocations(uniqueLocations)
+      } catch (err) {
+        console.error("Erro ao buscar bairros populares:", err)
+      }
+    }
+  
+    fetchPopularLocations()
+  }, [])
   
 
   const formatPrice = (price: number) => {
@@ -517,7 +536,7 @@ export function NavBar({ background = false }: NavBarProps) {
                 type="search"
                 placeholder="Buscar imóveis, localizações, características..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleInputChange} 
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 className={`
@@ -568,36 +587,36 @@ export function NavBar({ background = false }: NavBarProps) {
               </div>
             )}
 
-            {/* Popular searches */}
+            {/* Bairros sugeridos */}
             <div className="flex flex-col space-y-4">
               <div className="flex items-center gap-2">
                 <div className="h-px flex-grow bg-[#fabc3f]/10"></div>
-                <span className="text-sm text-gray-400">Buscas populares</span>
+                <span className="text-sm text-gray-400">Explore também</span>
                 <div className="h-px flex-grow bg-[#fabc3f]/10"></div>
               </div>
 
               <div className="flex flex-wrap gap-2">
-              {popularSearches.map((search, index) => (
+                {popularLocations.map((location, index) => (
                   <button
-                   key={index}
-                   type="button"
-                   onClick={() => {
-                     const query = encodeURIComponent(search)
+                    key={index}
+                    type="button"
+                    onClick={() => {
+                      const query = encodeURIComponent(location)
                       router.push(`/imoveis?search=${query}`)
                       setIsSearchOpen(false)
-                   }}
+                    }}
                     className={`
-                     px-4 py-2 rounded-full text-sm
-                     transition-all duration-300
-                     ${
-                       searchQuery === search
-                         ? "bg-[#fabc3f] text-[#0c1e20] font-medium"
+                      px-4 py-2 rounded-full text-sm
+                      transition-all duration-300
+                      ${
+                        searchQuery === location
+                          ? "bg-[#fabc3f] text-[#0c1e20] font-medium"
                           : "bg-[#fabc3f]/10 text-gray-300 hover:bg-[#fabc3f]/20 hover:text-white"
-                    }
+                      }
                     `}
-                 >
-                    {search}
-                 </button>
+                  >
+                    {location}
+                  </button>
                 ))}
               </div>
             </div>
