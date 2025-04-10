@@ -59,13 +59,20 @@ export default function PropertyPage({ property }: PropertyPageProps) {
             </div>
             <div className="space-y-6">
               <PropertyContact
-                broker={{
-                  name: property.brokers.name,
-                  company: property.brokers.company || '',
-                  creci: property.brokers.creci || '',
-                  phone: property.brokers.phone || '',
-                  email: property.brokers.email || '',
-                  avatar: property.brokers.avatar || '/placeholder.svg',
+                data={{
+                  property: {
+                    price: property.price,
+                    iptu: property.iptu || 0,
+                    year: property.year || 0
+                  },
+                  broker: {
+                    name: property.brokers.name,
+                    company: property.brokers.company || '',
+                    creci: property.brokers.creci || '',
+                    phone: property.brokers.phone || '',
+                    email: property.brokers.email || '',
+                    avatar: property.brokers.avatar || '/placeholder.svg',
+                  }
                 }}
               />
             </div>

@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Detalhe da propriedade
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select('*, brokers(*)')
         .eq('id', id)
         .single()
 
