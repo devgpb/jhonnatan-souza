@@ -31,6 +31,7 @@
     "cookie": "^1.0.2",
     "date-fns": "^4.1.0",
     "dot-env": "^0.0.1",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.4.1",
     "lucide-react": "^0.474.0",
     "next": "^15.2.4",

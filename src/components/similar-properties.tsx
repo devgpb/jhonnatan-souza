@@ -77,6 +77,7 @@ export function SimilarProperties({ currentId, currentCategory }: SimilarPropert
               suites={property.suites}
               location={property.location}
               parking={property.parking}
+              title={property.title || "Título não informado"}
               broker={{
                 name: property.brokers?.name || "Corretor não informado",
                 company: property.brokers?.company || "Empresa não informada",

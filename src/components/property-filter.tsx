@@ -1,16 +1,14 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
-import { Search, ChevronDown, X } from "lucide-react"
+import { Search, ChevronDown, X, Filter, MapPin, Home, SquareStack, Banknote, Tag, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 // Define as opções de filtro para cada campo
 interface FilterOption {
@@ -51,7 +49,7 @@ const statusOptions: FilterOption[] = [
   { id: "featured", label: "Em Destaque" },
 ]
 
-// NOVO: Opções para o filtro de tipo de imóvel
+// Opções para o filtro de tipo de imóvel
 const propertyTypes: FilterOption[] = [
   { id: "casa", label: "Casa" },
   { id: "apartamento", label: "Apartamento" },
@@ -67,26 +65,25 @@ interface FilterDropdownSingleProps {
   selected: string
   onSelect: (id: string) => void
   onRemove: () => void
+  icon?: React.ReactNode
 }
 
-function FilterDropdownSingle({
-  title,
-  options,
-  selected,
-  onSelect,
-  onRemove,
-}: FilterDropdownSingleProps) {
+function FilterDropdownSingle({ title, options, selected, onSelect, onRemove, icon }: FilterDropdownSingleProps) {
   const [search, setSearch] = useState("")
 
-  const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()))
+
+  const selectedOption = options.find((opt) => opt.id === selected)
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-10 text-sm">
-          {title}
+        <Button
+          variant="outline"
+          className={`h-10 text-sm transition-all duration-200 ${selected ? "border-gray-800 bg-gray-50" : ""}`}
+        >
+          {icon && <span className="mr-2">{icon}</span>}
+          {selected ? selectedOption?.label : title}
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -108,7 +105,7 @@ function FilterDropdownSingle({
                     <Badge
                       key={selected}
                       variant="secondary"
-                      className="flex items-center gap-1 pl-2 pr-1 py-1"
+                      className="flex items-center gap-1 pl-2 pr-1 py-1 bg-gray-100 hover:bg-gray-200"
                     >
                       {option.label}
                       <Button
@@ -131,7 +128,7 @@ function FilterDropdownSingle({
                 <Button
                   key={option.id}
                   variant="ghost"
-                  className="justify-start w-full text-sm"
+                  className={`justify-start w-full text-sm ${selected === option.id ? "bg-gray-100" : ""}`}
                   onClick={() => onSelect(option.id)}
                 >
                   {option.label}
@@ -154,26 +151,23 @@ interface FilterDropdownProps {
   selected: string[]
   onSelect: (id: string) => void
   onRemove: (id: string) => void
+  icon?: React.ReactNode
 }
 
-function FilterDropdown({
-  title,
-  options,
-  selected,
-  onSelect,
-  onRemove,
-}: FilterDropdownProps) {
+function FilterDropdown({ title, options, selected, onSelect, onRemove, icon }: FilterDropdownProps) {
   const [search, setSearch] = useState("")
 
-  const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="h-10 text-sm">
-          {title}
+        <Button
+          variant="outline"
+          className={`h-10 text-sm transition-all duration-200 ${selected.length > 0 ? "border-gray-800 bg-gray-50" : ""}`}
+        >
+          {icon && <span className="mr-2">{icon}</span>}
+          {title} {selected.length > 0 && `(${selected.length})`}
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -196,7 +190,7 @@ function FilterDropdown({
                     <Badge
                       key={id}
                       variant="secondary"
-                      className="flex items-center gap-1 pl-2 pr-1 py-1"
+                      className="flex items-center gap-1 pl-2 pr-1 py-1 bg-gray-100 hover:bg-gray-200"
                     >
                       {option.label}
                       <Button
@@ -219,7 +213,7 @@ function FilterDropdown({
                 <Button
                   key={option.id}
                   variant="ghost"
-                  className="justify-start w-full text-sm"
+                  className={`justify-start w-full text-sm ${selected.includes(option.id) ? "bg-gray-100" : ""}`}
                   onClick={() => onSelect(option.id)}
                 >
                   {option.label}
@@ -234,8 +228,7 @@ function FilterDropdown({
 }
 
 /**
- * Atualize a interface dos filtros para incluir o novo campo "type"
- * (representando o tipo de imóvel: casa, apartamento ou cobertura).
+ * Interface dos filtros
  */
 export interface TableFilters {
   type: string
@@ -256,12 +249,8 @@ interface TableFilterProps {
   initialFilters?: Partial<TableFilters>
 }
 
-export function PropertyFilters({
-  onFilter,
-  brokers = [],
-  initialFilters = {},
-}: TableFilterProps) {
-  // Desestrutura os filtros iniciais, incluindo o novo "type"
+export function PropertyFilters({ onFilter, brokers = [], initialFilters = {} }: TableFilterProps) {
+  // Desestrutura os filtros iniciais
   const {
     type: initialType = "",
     location: initialLocation = "",
@@ -272,7 +261,7 @@ export function PropertyFilters({
     search: initialSearch = "",
   } = initialFilters
 
-  // Estado para o novo filtro de tipo (seleção única)
+  // Estado para o filtro de tipo (seleção única)
   const [selectedType, setSelectedType] = useState<string>(initialType)
 
   // Estados para os demais filtros
@@ -284,15 +273,11 @@ export function PropertyFilters({
   const [searchQuery, setSearchQuery] = useState(initialSearch)
 
   // Handlers para filtros de seleção múltipla (ex.: área, preço, etc.)
-  const handleSelect = (
-    setter: React.Dispatch<React.SetStateAction<string[]>>
-  ) => (id: string) => {
+  const handleSelect = (setter: React.Dispatch<React.SetStateAction<string[]>>) => (id: string) => {
     setter((prev) => (prev.includes(id) ? prev : [...prev, id]))
   }
 
-  const handleRemove = (
-    setter: React.Dispatch<React.SetStateAction<string[]>>
-  ) => (id: string) => {
+  const handleRemove = (setter: React.Dispatch<React.SetStateAction<string[]>>) => (id: string) => {
     setter((prev) => prev.filter((item) => item !== id))
   }
 
@@ -304,7 +289,7 @@ export function PropertyFilters({
     setSelectedLocation("")
   }
 
-  // Handlers para o novo filtro de "Tipo"
+  // Handlers para o filtro de "Tipo"
   const handleTypeSelect = (id: string) => {
     setSelectedType(id)
   }
@@ -368,14 +353,19 @@ export function PropertyFilters({
   }
 
   return (
-    <div className="bg-white p-4 shadow-sm rounded-lg space-y-4">
+    <div className="bg-white p-6 shadow-sm rounded-xl border border-gray-100 transition-all duration-300">
+      <div className="flex items-center mb-4">
+        <Filter className="h-5 w-5 mr-2 text-gray-700" />
+        <h2 className="text-lg font-medium">Filtros de Busca</h2>
+      </div>
+
       <div className="flex flex-wrap gap-3 items-center">
         {/* Busca livre */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <div className="relative flex-1 min-w-[200px] group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors duration-200" />
           <Input
             placeholder="Buscar imóveis..."
-            className="pl-10 h-10"
+            className="pl-10 h-10 transition-all duration-200 focus:border-gray-800 focus:ring-1 focus:ring-gray-800"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyPress}
@@ -389,15 +379,17 @@ export function PropertyFilters({
           selected={selectedLocation}
           onSelect={handleLocationSelect}
           onRemove={handleLocationRemove}
+          icon={<MapPin className="h-4 w-4" />}
         />
 
-        {/* Novo filtro para Tipo de imóvel (seleção única) */}
+        {/* Filtro para Tipo de imóvel (seleção única) */}
         <FilterDropdownSingle
           title="Tipo"
           options={propertyTypes}
           selected={selectedType}
           onSelect={handleTypeSelect}
           onRemove={handleTypeRemove}
+          icon={<Home className="h-4 w-4" />}
         />
 
         {/* Filtro para Área */}
@@ -407,6 +399,7 @@ export function PropertyFilters({
           selected={selectedAreas}
           onSelect={handleSelect(setSelectedAreas)}
           onRemove={handleRemove(setSelectedAreas)}
+          icon={<SquareStack className="h-4 w-4" />}
         />
 
         {/* Filtro para Valor */}
@@ -416,6 +409,7 @@ export function PropertyFilters({
           selected={selectedPrices}
           onSelect={handleSelect(setSelectedPrices)}
           onRemove={handleRemove(setSelectedPrices)}
+          icon={<Banknote className="h-4 w-4" />}
         />
 
         {/* Filtro para Status */}
@@ -425,6 +419,7 @@ export function PropertyFilters({
           selected={selectedStatuses}
           onSelect={handleSelect(setSelectedStatuses)}
           onRemove={handleRemove(setSelectedStatuses)}
+          icon={<Tag className="h-4 w-4" />}
         />
 
         {/* Filtro para Corretor */}
@@ -434,21 +429,72 @@ export function PropertyFilters({
           selected={selectedBrokers}
           onSelect={handleSelect(setSelectedBrokers)}
           onRemove={handleRemove(setSelectedBrokers)}
+          icon={<User className="h-4 w-4" />}
         />
 
         {/* Botão para filtrar */}
-        <Button onClick={handleSearch} className="h-10 px-6">
+        <Button
+          onClick={handleSearch}
+          className="h-10 px-6 bg-gray-800 hover:bg-gray-900 transition-colors duration-200"
+        >
           <Search className="h-4 w-4 mr-2" />
           Filtrar
         </Button>
 
         {/* Botão para resetar filtros se houver algum selecionado */}
         {filtersSelected && (
-          <Button onClick={handleReset} variant="outline" className="h-10 px-6">
-            Resetar
+          <Button
+            onClick={handleReset}
+            variant="outline"
+            className="h-10 px-6 border-gray-300 hover:bg-gray-100 transition-colors duration-200"
+          >
+            <X className="h-4 w-4 mr-2" />
+            Limpar
           </Button>
         )}
       </div>
+
+      {/* Indicador de filtros ativos */}
+      {filtersSelected && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm text-gray-500">Filtros ativos:</span>
+            {selectedType && (
+              <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200">
+                Tipo: {propertyTypes.find((t) => t.id === selectedType)?.label}
+              </Badge>
+            )}
+            {selectedLocation && (
+              <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200">
+                Bairro: {location.find((l) => l.id === selectedLocation)?.label}
+              </Badge>
+            )}
+            {selectedAreas.map((area) => (
+              <Badge key={area} className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200">
+                Área: {areaRanges.find((a) => a.id === area)?.label}
+              </Badge>
+            ))}
+            {selectedPrices.map((price) => (
+              <Badge key={price} className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200">
+                Valor: {priceRanges.find((p) => p.id === price)?.label}
+              </Badge>
+            ))}
+            {selectedStatuses.map((status) => (
+              <Badge
+                key={status}
+                className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200"
+              >
+                Status: {statusOptions.find((s) => s.id === status)?.label}
+              </Badge>
+            ))}
+            {searchQuery && (
+              <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200">
+                Busca: "{searchQuery}"
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
