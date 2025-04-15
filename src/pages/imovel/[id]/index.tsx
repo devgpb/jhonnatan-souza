@@ -32,6 +32,9 @@ type Property = {
   amenities?: string[]
   images: string[]
   brokers: Broker
+  condominium?: number
+  floor?: number
+  rent?: number | null
 }
 
 interface PropertyPageProps {
@@ -63,7 +66,9 @@ export default function PropertyPage({ property }: PropertyPageProps) {
                   property: {
                     price: property.price,
                     iptu: property.iptu || 0,
-                    year: property.year || 0
+                    year: property.year || 0,
+                    rent: property.rent ?? 0,
+                    condominium: property.condominium || 0,
                   },
                   broker: {
                     name: property.brokers.name,
@@ -115,6 +120,9 @@ export async function getServerSideProps(
           sold: data.sold ?? false,
           iptu: data.iptu != null ? data.iptu : null,
           year: data.year != null ? data.year : null,
+          condominium: data.condominium != null ? data.condominium : null,
+          floor: data.floor != null ? data.floor : null,
+          rent: data.rent != null ? data.rent : null,
           suites: data.suites ?? 0,
           bathrooms: data.bathrooms ?? 0,
           parking: data.parking ?? 0,

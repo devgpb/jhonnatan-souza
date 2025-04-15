@@ -35,7 +35,7 @@ model properties {
   bathrooms   Int               @default(0)
   parking     Int               @default(0)
   year        Int?
-  iptu        Decimal?          @db.Decimal(10, 2)
+  iptu        Float?            @db.Real
   sold        Boolean           @default(false)
   description String?
   amenities   String?
@@ -46,6 +46,9 @@ model properties {
   type        properties_types?
   featured    Boolean?
   exclusive   Boolean?          @default(false)
+  rent        Float?            @db.Real
+  floor       Int?              @db.SmallInt
+  condominium Float?            @db.Real
   brokers     brokers?          @relation(fields: [broker_id], references: [id], onUpdate: NoAction)
 }
 

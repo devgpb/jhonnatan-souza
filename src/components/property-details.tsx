@@ -1,6 +1,6 @@
 import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Bed, Bath, Car, Square, MapPin } from "lucide-react";
+import { Bed, Bath, Car, Square, MapPin, Building } from "lucide-react";
 
 interface PropertyDetailsProps {
   property: {
@@ -13,6 +13,7 @@ interface PropertyDetailsProps {
     suites: number;
     bathrooms: number;
     parking: number;
+    floor?: number;
     amenities: string[];
   };
 }
@@ -63,6 +64,20 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
           <span className="text-sm md:text-lg font-semibold">{property.parking}</span>
           <span className="text-xs md:text-sm text-muted-foreground">Vagas</span>
         </div>
+        {property.suites && property.suites > 0 && (
+          <div className="flex flex-col items-center gap-1 md:gap-2">
+            <Bath className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
+            <span className="text-sm md:text-lg font-semibold">{property.suites}</span>
+            <span className="text-xs md:text-sm text-muted-foreground">Suítes</span>
+          </div>
+        )}
+        {property.floor !== undefined && property.floor !== null && (
+          <div className="flex flex-col items-center gap-1 md:gap-2">
+            <Building className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
+            <span className="text-sm md:text-lg font-semibold">{property.floor}</span>
+            <span className="text-xs md:text-sm text-muted-foreground">Andar</span>
+          </div>
+        )}
       </div>
 
       {/* Características */}

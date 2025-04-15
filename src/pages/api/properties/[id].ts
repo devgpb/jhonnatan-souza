@@ -40,6 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .single()
     
       if (error) {
+        console.log(error)
+        console.log(req.body)
         return res.status(400).json({ error: error.message })
       }
     

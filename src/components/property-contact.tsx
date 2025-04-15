@@ -11,6 +11,8 @@ interface PropertyContactProps {
       price: number;
       iptu: number;
       year: number;
+      rent: number;
+      condominium: number;
     }
     broker: {
       name: string;
@@ -35,10 +37,20 @@ export function PropertyContact({ data }: PropertyContactProps) {
             </div>
 
             <div className="space-y-3 md:space-y-4">
-              {/* <div className="flex justify-between text-xs md:text-sm">
-                <span className="text-muted-foreground">Valor do condomínio</span>
-                <span>R$ 1.000</span>
-              </div> */}
+                {data.property.rent !== null && data.property.rent !== undefined && (
+                <div className="flex justify-between text-xs md:text-sm">
+                  <span className="text-muted-foreground">Valor do Aluguel</span>
+                  <span>{formatCurrency(data.property.rent)}</span>
+                </div>
+                )}
+
+                {data.property.condominium !== null && data.property.condominium !== undefined && (
+                  <div className="flex justify-between text-xs md:text-sm">
+                    <span className="text-muted-foreground">Condomínio</span>
+                    <span>{formatCurrency(data.property.condominium)}</span>
+                  </div>
+                )}
+
               <div className="flex justify-between text-xs md:text-sm">
                 <span className="text-muted-foreground">IPTU (mensal)</span>
                 <span>{formatCurrency(data.property.iptu)}</span>

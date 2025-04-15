@@ -7,23 +7,8 @@ import { useDropzone } from "react-dropzone"
 import { motion, AnimatePresence } from "framer-motion"
 import * as Progress from "@radix-ui/react-progress"
 import {
-  AlertCircle,
-  Check,
-  ImageIcon,
-  Loader2,
-  Upload,
-  X,
-  Building2,
-  MapPin,
-  DollarSign,
-  Ruler,
-  BedDouble,
-  Bath,
-  Car,
-  Calendar,
-  Tag,
-  FileText,
-  User,
+  AlertCircle, Check, ImageIcon, Loader2, Upload, X, Building2, MapPin, DollarSign, 
+  Ruler, BedDouble, Bath, Car, Calendar, Tag, FileText, User, Building
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -61,6 +46,9 @@ interface PropertyValues {
   broker_id: string
   type: string
   exclusive: boolean
+  rent?: string
+  condominium?: string
+  floor?: string | null
 }
 
 interface FormStatus {
@@ -135,6 +123,9 @@ const initialValues: PropertyValues = {
   description: "",
   broker_id: "",
   type: "",
+  rent: "0",
+  condominium: "0",
+  floor: null,
   exclusive: false,
 }
 
@@ -175,34 +166,39 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
       if (!propertyToEdit?.id) return
 
       try {
-        const property = await propertyService.getPropertyById(propertyToEdit.id)
+      const property = await propertyService.getPropertyById(propertyToEdit.id)
 
-        setFormValues({
-          ...initialValues,
-          ...property,
-          broker_id: property.broker_id ? property.broker_id : "",
-          price: property.price?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
-          area: property.area?.toString() || "",
-          iptu: property.iptu?.toString() || "",
-          year: property.year?.toString() || "",
-          bedrooms: property.bedrooms?.toString() || "",
-          bathrooms: property.bathrooms?.toString() || "",
-          parking: property.parking?.toString() || "",
-          suites: property.suites?.toString() || "",
-        })
+      const { brokers, ...propertyWithoutBrokers } = property
 
-        // Aqui faz a separação das imagens já existentes
-        setExistingImages(property.images || [])
-        setImagePreviews(property.images || [])
+      setFormValues({
+        ...initialValues,
+        ...propertyWithoutBrokers,
+        broker_id: property.broker_id ? property.broker_id : "",
+        price: property.price?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+        area: property.area?.toString() || "",
+        iptu: property.iptu?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) || "",
+        year: property.year?.toString() || "",
+        rent: property.rent?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) || "",
+        condominium: property.condominium?.toLocaleString("pt-BR", { minimumFractionDigits: 2 }) || "",
+        floor: property.floor?.toString() || "",
+        bedrooms: property.bedrooms?.toString() || "",
+        bathrooms: property.bathrooms?.toString() || "",
+        parking: property.parking?.toString() || "",
+        suites: property.suites?.toString() || "",
+      })
 
-        // Se tiver diferenciais
-        setTags(property.amenities ? property.amenities.split(",") : [])
-      } catch (error) {
-        console.error("Erro ao buscar imóvel:", error)
-        setStatus({
-          type: "error",
-          message: "Erro ao carregar dados do imóvel.",
-        })
+      // Aqui faz a separação das imagens já existentes
+      setExistingImages(property.images || [])
+      setImagePreviews(property.images || [])
+
+      // Se tiver diferenciais
+      setTags(property.amenities ? property.amenities.split(",") : [])
+        } catch (error) {
+      console.error("Erro ao buscar imóvel:", error)
+      setStatus({
+        type: "error",
+        message: "Erro ao carregar dados do imóvel.",
+      })
       }
     }
 
@@ -294,6 +290,9 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
     if (!formValues.price) errors.price = "Preço é obrigatório"
     if (!formValues.area) errors.area = "Área é obrigatória"
     if (!formValues.broker_id) errors.broker_id = "Corretor é obrigatório"
+    if (formValues.rent && parseCurrency(formValues.rent) <= 0) {
+      errors.rent = "O valor do aluguel deve ser maior que 0"
+    }
 
     return errors
   }
@@ -346,8 +345,12 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
         // Convertendo strings pra número/boolean onde necessário
         price: formValues.price ? parseCurrency(formValues.price) : null,
         area: formValues.area ? Number.parseFloat(formValues.area) : null,
-        iptu: formValues.iptu ? Number.parseFloat(formValues.iptu) : null,
+        iptu: formValues.iptu ? parseCurrency(formValues.iptu) : null,
         year: formValues.year ? Number.parseInt(formValues.year, 10) : null,
+        broker_id: formValues.broker_id,
+        rent: formValues.rent ? parseCurrency(formValues.rent) : null,
+        condominium: formValues.condominium ? parseCurrency(formValues.condominium) : null,
+        floor: formValues.floor ? Number.parseInt(formValues.floor, 10) : null,
         bedrooms: formValues.bedrooms ? Number.parseInt(formValues.bedrooms, 10) : 0,
         bathrooms: formValues.bathrooms ? Number.parseInt(formValues.bathrooms, 10) : 0,
         parking: formValues.parking ? Number.parseInt(formValues.parking, 10) : 0,
@@ -529,7 +532,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                     )}
                   />
                 </div>
-                
+
               </div>
               <p className="text-sm text-muted-foreground">
                 Imóveis exclusivos são comercializados apenas por esta imobiliária e recebem destaque especial.
@@ -541,7 +544,7 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
               <Label htmlFor="price">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
-                  <span>Preço</span>
+                  <span>Valor</span>
                 </div>
               </Label>
               <div className="flex gap-4 items-center">
@@ -561,6 +564,149 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                   {touched.price && !formValues.price && <p className="text-sm text-red-500">Preço é obrigatório</p>}
                 </div>
               </div>
+            </div>
+
+
+
+            {/* Alugável */}
+            <div className="w-full grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <div
+                  className="flex items-center justify-between p-4 rounded-md border border-input bg-background hover:bg-accent/10 transition-colors cursor-pointer"
+                  onClick={() =>
+                    setFormValues((prev) => ({
+                      ...prev,
+                      rent: prev.rent ? "" : "0",
+                    }))
+                  }
+                >
+                  <Label className="text-base font-medium flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Alugável
+                  </Label>
+                  <div
+                    className={cn(
+                      "relative inline-flex h-7 w-14 cursor-pointer items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      formValues.rent ? "bg-primary" : "bg-gray-300"
+                    )}
+                  >
+                    <span className="sr-only">Toggle Alugável</span>
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block h-6 w-6 rounded-full bg-background shadow-lg ring-0 transition-transform",
+                        formValues.rent ? "translate-x-7" : "translate-x-0"
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              
+            </div>
+
+            <div className="space-y-2">
+            {formValues.rent && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ml-auto w-full md:w-auto">
+                  {/* Valor do Aluguel */}
+                  <div className="space-y-2">
+                    <Label htmlFor="rent">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        <span>Valor do Aluguel</span>
+                      </div>
+                    </Label>
+                    <Input
+                      id="rent"
+                      name="rent"
+                      value={formValues.rent}
+                      onBlur={() => handleBlur("rent")}
+                      onChange={(e) => {
+                        const formatted = formatCurrency(e.target.value)
+                        setFormValues((prev) => ({ ...prev, rent: formatted }))
+                      }}
+                      placeholder="Ex: 1500"
+                      min="0"
+                      className={cn(
+                        "w-full",
+                        touched.rent && parseCurrency(formValues.rent) <= 0 && "border-red-500 focus-visible:ring-red-500"
+                      )}
+                    />
+                    {touched.rent && parseCurrency(formValues.rent) <= 0 && (
+                      <p className="text-sm text-red-500">O valor do aluguel deve ser maior que 0</p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      Se ativado, o valor do aluguel deve ser maior que zero.
+                    </p>
+                  </div>
+
+                  {/* Valor do Condomínio */}
+                  <div className="space-y-2">
+                    <Label htmlFor="condominium">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        <span>Valor do Condomínio</span>
+                      </div>
+                    </Label>
+                    <Input
+                      id="condominium"
+                      name="condominium"
+                      value={formValues.condominium}
+                      onBlur={() => handleBlur("condominium")}
+                      onChange={(e) => {
+                        const formatted = formatCurrency(e.target.value)
+                        setFormValues((prev) => ({ ...prev, condominium: formatted }))
+                      }}
+                      placeholder="Ex: 500"
+                      min="0"
+                      className={cn(
+                        "w-full",
+                        touched.condominium &&
+                        parseCurrency(formValues.condominium || "0") < 0 &&
+                        "border-red-500 focus-visible:ring-red-500"
+                      )}
+                    />
+                    {touched.condominium && parseCurrency(formValues.condominium || "0") < 0 && (
+                      <p className="text-sm text-red-500">O valor do condomínio não pode ser negativo</p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      Informe o valor do condomínio, se aplicável.
+                    </p>
+                  </div>
+                </div>
+            )}
+            </div>
+
+
+            {/* IPTU */}
+            <div className="space-y-2">
+              <Label htmlFor="iptu">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  <span>Valor do IPTU</span>
+                </div>
+              </Label>
+              <Input
+                id="iptu"
+                name="iptu"
+                value={formValues.iptu}
+                onBlur={() => handleBlur("iptu")}
+                onChange={(e) => {
+                  const formatted = formatCurrency(e.target.value)
+                  setFormValues((prev) => ({ ...prev, iptu: formatted }))
+                }}
+                placeholder="Ex: 150"
+                min="0"
+                className={cn(
+                  "w-full",
+                  touched.iptu && parseCurrency(formValues.iptu || "0") < 0 && "border-red-500 focus-visible:ring-red-500"
+                )}
+              />
+              {touched.iptu && parseCurrency(formValues.iptu || "0") < 0 && (
+                <p className="text-sm text-red-500">O valor do IPTU não pode ser negativo</p>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Informe o valor do IPTU, se aplicável.
+              </p>
             </div>
           </div>
         </div>
@@ -687,6 +833,27 @@ export default function PropertyForm({ propertyToEdit, onSuccess }: PropertyForm
                 min="0"
               />
             </div>
+
+            {/* Andar */}
+            {formValues.type === "apartamento" && (
+              <div className="space-y-2">
+                <Label htmlFor="floor">
+                  <div className="flex items-center gap-2">
+                    <Building className="h-4 w-4" />
+                    <span>Andar</span>
+                  </div>
+                </Label>
+                <Input
+                  id="floor"
+                  name="floor"
+                  type="number"
+                  value={formValues.floor ?? ""}
+                  onChange={handleInputChange}
+                  placeholder="Ex: 5"
+                  min="0"
+                />
+              </div>
+            )}
           </div>
 
           {/* Diferenciais (tags) */}
