@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Buscar todas as locations existentes
     const { data: locationsData, error: locationsError } = await supabase
       .from('properties')
-      .select('location')
+      .select('location, images')
 
     if (locationsError) throw locationsError
 
@@ -26,15 +26,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const safeKeyword = typeof keyword === 'string' ? keyword.trim() : ''
 
       const { data, error } = await supabase
-        .from('properties')
-        .select('id, images')
-        .ilike('location', `%${safeLocation}%`)
-        .ilike('title', `%${safeKeyword}%`)
-        .limit(1)
-        .single()
+      .from('properties')
+      .select('id, images')
+      .ilike('location', `%${safeLocation}%`)
+      .ilike('title', `%${safeKeyword}%`)
 
       if (error || !data) return null
-      return data
+
+      const limitedData = data.map(property => ({
+      ...property,
+      images: Array.isArray(property.images) ? property.images.slice(0, 10) : property.images
+      }))
+      
+      if(limitedData.length == 0) return null
+
+      return limitedData
+    }
+
+    // Selecionar uma imagem aleatória de uma propriedade aleatória
+    const getRandomImage = () => {
+      const randomProperty = locationsData[Math.floor(Math.random() * locationsData.length)]
+      if (randomProperty && Array.isArray(randomProperty.images) && randomProperty.images.length > 0) {
+        return randomProperty.images[Math.floor(Math.random() * randomProperty.images.length)]
+      }
+      return null
     }
 
     // Montar estrutura final de bairros com imóveis
@@ -46,11 +61,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const apartamento = await fetchPropertiesByLocationAndType(location, 'Apartamento')
         const casa = await fetchPropertiesByLocationAndType(location, 'Casa')
         const cobertura = await fetchPropertiesByLocationAndType(location, 'Cobertura')
+        const randomImage = getRandomImage()
     
         return {
           location,
           description: `Explore as melhores opções em ${location}.`,
-          principal,
+          principal: randomImage ? { image: randomImage } : principal,
           apartamento,
           casa,
           cobertura,

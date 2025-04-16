@@ -17,6 +17,7 @@ export function FeaturedNeighborhoods() {
       try {
         const res = await fetch('/api/featured-locations')
         const data = await res.json()
+        console.log(data)
         setNeighborhoods(data)
       } catch (error) {
         console.error('Erro ao carregar bairros:', error)
@@ -72,7 +73,7 @@ export function FeaturedNeighborhoods() {
             { type: "Casa", data: neighborhood.casa },
             { type: "Cobertura", data: neighborhood.cobertura },
           ]
-
+          console.log(propertyTypes[0])
           return (
             <div
               key={neighborhood.location}
@@ -83,7 +84,7 @@ export function FeaturedNeighborhoods() {
               {/* Imagem principal */}
               <div className="relative h-64 sm:h-[500px] mb-6">
                 <Image
-                  src={neighborhood.principal?.images?.[0] || "/placeholder.svg"}
+                  src={neighborhood.principal.image || "/placeholder.svg"}
                   alt={neighborhood.location}
                   fill
                   className="object-cover rounded-lg brightness-75"
@@ -119,7 +120,7 @@ export function FeaturedNeighborhoods() {
                       >
                         <div className="relative aspect-[4/3]">
                           <Image
-                            src={property.data.images?.[0] || "/placeholder.svg"}
+                            src={property.data[0].images?.[0] || "/placeholder.svg"}
                             alt={property.type}
                             fill
                             className={`object-cover transition-transform duration-300 ${

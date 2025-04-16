@@ -381,8 +381,14 @@ export function ExclusiveProperties() {
                   ))}
                 </div>
               ))}
+
             </div>
           </div>
+                {properties.length === 0 ? (
+                <div className="flex justify-center items-center h-64">
+                  <span className="text-white text-lg">Sem exclusivos no momento</span>
+                </div>
+                ) : null}
 
           <Button
             variant="ghost"
