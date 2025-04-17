@@ -25,6 +25,22 @@ interface PropertyContactProps {
   }
 }
 
+const openWhatsApp = (phone: string) => {
+  let cleanedPhone = phone.replace(/\D/g, "");
+
+  // Remove o 55 do início se já tiver
+  if (cleanedPhone.startsWith("55")) {
+    cleanedPhone = cleanedPhone.slice(2);
+  }
+
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  const url = isMobile
+    ? `https://wa.me/55${cleanedPhone}`
+    : `https://web.whatsapp.com/send?phone=55${cleanedPhone}`;
+
+  window.open(url, "_blank");
+};
+
 export function PropertyContact({ data }: PropertyContactProps) {
   return (
     <div className="space-y-4 md:space-y-6 md:sticky md:top-28">
@@ -75,12 +91,15 @@ export function PropertyContact({ data }: PropertyContactProps) {
               </div>
             </div>
 
-            <Button className="w-full bg-black hover:bg-black/90 text-sm md:text-base h-10 md:h-12">
-              Falar com {data.broker.name.split(" ")[0]}
-            </Button>
+            <Button
+                onClick={() => openWhatsApp(data.broker.phone)}
+                className="w-full bg-black hover:bg-black/90 text-sm md:text-base h-10 md:h-12"
+              >
+                Falar com {data.broker.name.split(" ")[0]}
+              </Button>
           </div>
         </CardContent>
-      </Card>
+      </Card>           
     </div>
   );
 }
